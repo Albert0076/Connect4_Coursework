@@ -1,4 +1,5 @@
 import pyinputplus
+import random
 
 
 class Grid:
@@ -14,6 +15,8 @@ class Grid:
             if piece.is_empty() and not placed:
                 piece.colour = colour
                 placed = True
+
+                return column
 
         if not placed:
             raise IndexError("Column is full")
@@ -94,6 +97,9 @@ class Grid:
 
             return_str += "\n"
 
+        for i in range(1, self.columns+1):
+            return_str += str(i) + " "
+
         return return_str
 
 
@@ -130,27 +136,41 @@ class Game:
         self.win_num = win_num
         self.players = []
         self.interface = interface
+        self.game_over = False
+        self.winning_player = None
 
     def add_human_player(self, colour, name):
         self.players.append(HumanPlayer(colour, name))
 
+    def get_grid(self):
+        return self.grid
+
     def make_move(self, player):
         colour = player.colour
-        column = player.get_column()
-        self.grid.add_piece(column, colour)
+        if isinstance(player, HumanPlayer):
+            column = self.interface.get_move(player)
+        else:
+            column = random.randint(0, self.columns - 1)
+        return_message = self.grid.add_piece(column, colour)
         if self.grid.check_winning_move(self.grid.get_top(column)):
             self.game_won(player)
 
+        return return_message
+
     def game_won(self, player):
-        pass
+        self.game_over = True
+        self.winning_player = player
 
     def reset(self):
         self.grid.reset()
 
     def main_loop(self):
-        for player in self.players:
-            if isinstance(HumanPlayer, player):
-                move = self.interface.get_move(player)
+        while not self.game_over:
+            for player in self.players:
+                if not self.game_over:
+                    self.interface.display_move(self.make_move(player), player)
+
+        self.interface.end_game(self.winning_player)
 
 
 class Player:
@@ -169,20 +189,48 @@ class CLI:
     def __init__(self):
         self.game = None
 
+    def main(self):
+        self.setup()
+        self.get_players()
+        self.display_grid()
+        self.game.main_loop()
+
     def setup(self):
         print("Welcome to Connect4!")
-        user_default = pyinputplus.inputBool("Do you want to use default rules?", "Yes", "No")
+        user_default = pyinputplus.inputYesNo("Do you want to use default rules?", "Yes", "No")
+        user_default = (user_default == "yes")
         if not user_default:
             columns = pyinputplus.inputInt("Enter columns: ", min=1)
             rows = pyinputplus.inputInt("Enter rows: ", min=1)
             win_num = pyinputplus.inputInt("Enter number of pieces needed to win", min=1)
-            self.game = Game(columns, rows, win_num)
+            self.game = Game(self, columns, rows, win_num)
 
         else:
             self.game = Game(self)
 
+
+
+    def get_players(self):
+        p1_name = pyinputplus.inputStr("Enter Player 1 Name: ")
+        p2_name = pyinputplus.inputStr("Enter Player 2 Name: ")
+
+        self.game.add_human_player(p1_name, "Red")
+        self.game.add_human_player(p2_name, "Blue")
+
     def get_move(self, player):
-        pass
+        return pyinputplus.inputInt(f"{player.name}'s turn. Enter column: ", min=1, max=self.game.columns)-1
+
+    def end_game(self, wining_player):
+        print(f"Well done {wining_player.name} you won!")
+        if pyinputplus.inputBool("Do you want to play another game?", "Yes", "No") == "yes":
+            self.setup()
+
+    def display_move(self, move, player):
+        print(self.game.get_grid())
+        print(f"{player.name} placed a piece in column {move+1}")
+
+    def display_grid(self):
+        print(self.game.get_grid())
 
 
 if __name__ == "__main__":
