@@ -212,8 +212,9 @@ def play_self():
 
 
 def measure_times():
+    random.seed(0)
     grids = []
-    for i in range(100):
+    for i in range(1000):
         grid = Grid()
         for column in grid.array:
             for piece in column:
@@ -228,8 +229,9 @@ def measure_times():
 
 
 def measure_times_alpha_beta():
+    random.seed(0)
     grids = []
-    for i in range(100):
+    for i in range(1000):
         grid = Grid()
         for column in grid.array:
             for piece in column:
