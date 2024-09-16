@@ -238,6 +238,8 @@ if __name__ == "__main__":
     grid.add_piece(0, "blue")
     grid.add_piece(0, "red")
     grid.add_piece(1, "red")
-    x = grid.get_piece(0, 1)
+    grid.add_piece(3, "red")
+    x = grid.get_piece(3, 0)
+
     print(grid)
     print(grid.check_winning_move(x))
