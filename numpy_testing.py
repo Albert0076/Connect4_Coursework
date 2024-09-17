@@ -1,18 +1,24 @@
 import numpy as np
+import copy
 from connect4_structure_prototype import Grid, Cell
+import random
+
+MAX = 100
+MIN = -100
 
 
 # Player 1: 1, Player 2: 2, Empty: 0
 
 
 def convert_to_np(grid: Grid):
-    np_grid = np.zeros((grid.num_rows, grid.num_columns))
-    for cell in grid.cells.items():
-        if cell.symbol[0] == "r":
-            np_grid[cell.row, cell.column] = 1
+    np_grid = np.zeros((grid.num_columns, grid.num_rows))
+    for cell in grid.cells.values():
+        if not cell.is_empty():
+            if cell.symbol == "r":
+                np_grid[cell.column, cell.row] = 1
 
-        elif not cell.is_empty():
-            np_grid[cell.row, cell.column] = 2
+            else:
+                np_grid[cell.column, cell.row] = 2
 
     return np_grid
 
@@ -71,3 +77,88 @@ def check_win(grid, p_num: int):
                     return -10
 
     return 0
+
+
+player_dict = {True: 1, False: 2}
+
+
+def minimax(alpha, beta, is_max, p_grid, depth):
+    # Currently we use the check_win function to evaluate the value of a grid. To make a faster but maybe less
+    # accurate computer we could only go to a certain depth but have a more sophisticated evaluate function
+    if depth == 0:
+        return 0
+    p_num = player_dict[is_max]
+    win = check_win(p_grid, p_num)
+    if win != 0:
+        return win
+
+    val_list = []
+    if is_max:
+        best = MIN
+
+    else:
+        best = MAX
+    for column in range(p_grid.shape[0]):
+        try:
+            val_list.append(minimax(alpha, beta, not is_max, add_piece(p_grid, p_num, column), depth - 1))
+            if is_max:
+                best = max(best, val_list[-1])
+                alpha = max(alpha, best)
+
+            else:
+                best = min(best, val_list[-1])
+                beta = min(beta, best)
+
+            if beta <= alpha:
+                break
+
+        except:
+            pass
+
+    return best
+
+
+def find_best_move(grid, p_num, depth):
+    if p_num == 1:
+        is_max = True
+
+    else:
+        is_max = False
+    move_values = []
+    for i in range(grid.shape[0]):
+        try:
+            move_values.append(minimax(MIN, MAX, is_max, add_piece(grid, p_num, i), depth))
+
+        except IndexError:
+            move_values.append(MIN)
+        if move_values[-1] == 10:
+            break
+
+    max_val = np.max(move_values)
+    max_values = np.where(move_values == max_val)[0]
+    return random.choice(max_values)
+
+
+def add_piece(p_grid, p_num, column):
+    new_grid = copy.deepcopy(p_grid) # This copy is using a lot of time may need to get a different system
+    for i in range(new_grid.shape[1]):
+        if new_grid[column, i] == 0:
+            new_grid[column, i] = p_num
+            return new_grid
+
+    raise IndexError
+
+def play_game():
+    grid = convert_to_np(Grid())
+    while check_win(grid, 1) == 0:
+        move = find_best_move(grid, 1, 9)
+        print(move)
+        grid = add_piece(grid, 1, move)
+        print(grid)
+        move = int(input())
+        grid = add_piece(grid, 2, move)
+
+
+
+if __name__ == "__main__":
+    play_game()
