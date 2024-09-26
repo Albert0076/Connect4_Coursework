@@ -1,10 +1,9 @@
 import numpy as np
-import copy
 from connect4_structure_prototype import Grid, Cell
 import random
 
-MAX = 100
-MIN = -100
+MAX = 10
+MIN = -10
 
 
 # Player 1: 1, Player 2: 2, Empty: 0
@@ -71,76 +70,86 @@ def check_win(grid, p_num: int):
 
             if found:
                 if win_num == p_num:
-                    return 10
+                    return MAX
 
                 else:
-                    return -10
+                    return MIN
 
     return 0
 
 
-player_dict = {True: 1, False: 2}
-
-
-def minimax(alpha, beta, is_max, p_grid, depth):
-    # Currently we use the check_win function to evaluate the value of a grid. To make a faster but maybe less
-    # accurate computer we could only go to a certain depth but have a more sophisticated evaluate function
-    if depth == 0:
-        return 0
+def minimax(is_max, grid, player_dict, alpha, beta):
     p_num = player_dict[is_max]
-    win = check_win(p_grid, p_num)
-    if win != 0:
-        return win
+    win_num = check_win(grid, player_dict[True])
+    if win_num != 0:
+        return win_num
 
-    val_list = []
+    if is_full(grid):
+        return 0
+
+    next_moves = []
     if is_max:
         best = MIN
 
     else:
         best = MAX
-    for column in range(p_grid.shape[0]):
+    for i in range(grid.shape[0]):
         try:
-            val_list.append(minimax(alpha, beta, not is_max, add_piece(p_grid, p_num, column), depth - 1))
+            val = (minimax(not is_max, add_piece(grid, p_num, i), player_dict, alpha, beta))
+            next_moves.append(val)
             if is_max:
-                best = max(best, val_list[-1])
-                alpha = max(alpha, best)
+                best = max(best, val)
+                alpha = max(best, alpha)
+
 
             else:
-                best = min(best, val_list[-1])
+                best = min(best, val)
                 beta = min(beta, best)
 
             if beta <= alpha:
                 break
 
-        except:
-            pass
-
-    return best
-
-
-def find_best_move(grid, p_num, depth):
-    if p_num == 1:
-        is_max = True
-
-    else:
-        is_max = False
-    move_values = []
-    for i in range(grid.shape[0]):
-        try:
-            move_values.append(minimax(MIN, MAX, is_max, add_piece(grid, p_num, i), depth))
 
         except IndexError:
-            move_values.append(MIN)
-        if move_values[-1] == 10:
-            break
+            if is_max:
+                next_moves.append(MIN)
 
-    max_val = np.max(move_values)
-    max_values = np.where(move_values == max_val)[0]
-    return random.choice(max_values)
+            else:
+                next_moves.append(MAX)
+
+    if is_max:
+        return max(next_moves)
+
+    else:
+        return min(next_moves)
+
+
+def find_best_move(grid, p_num):
+    if p_num == 1:
+        player_dict = {True: 1, False: 2}
+    else:
+        player_dict = {True: 2, False: 1}
+
+    alpha = MIN
+    beta = MAX
+    best = MIN
+    possible_moves = []
+    for i in range(grid.shape[0]):
+        try:
+            val = minimax(False, add_piece(grid, p_num, i), player_dict, alpha, beta)
+            best = max(best, val)
+            alpha = max(best, alpha)
+            possible_moves.append(val)
+            if beta <= alpha:
+                break
+        except IndexError:
+            possible_moves.append(MIN)
+
+    return possible_moves.index(max(possible_moves))
 
 
 def add_piece(p_grid, p_num, column):
-    new_grid = copy.deepcopy(p_grid) # This copy is using a lot of time may need to get a different system
+    new_grid = np.copy(p_grid)
     for i in range(new_grid.shape[1]):
         if new_grid[column, i] == 0:
             new_grid[column, i] = p_num
@@ -148,17 +157,18 @@ def add_piece(p_grid, p_num, column):
 
     raise IndexError
 
-def play_game():
-    grid = convert_to_np(Grid())
-    while check_win(grid, 1) == 0:
-        move = find_best_move(grid, 1, 9)
-        print(move)
-        grid = add_piece(grid, 1, move)
-        print(grid)
-        move = int(input())
-        grid = add_piece(grid, 2, move)
+def is_full(grid):
+    for num in grid.flatten():
+        if num == 0:
+            return False
+
+    return True
 
 
 
 if __name__ == "__main__":
-    play_game()
+    grid = convert_to_np(Grid())
+    for i in range(3):
+        grid = add_piece(grid, 1, 1)
+
+    print(find_best_move(grid, 1))
