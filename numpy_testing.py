@@ -78,50 +78,47 @@ def check_win(grid, p_num: int):
     return 0
 
 
-def minimax(is_max, grid, player_dict, alpha, beta):
-    p_num = player_dict[is_max]
-    win_num = check_win(grid, player_dict[True])
-    if win_num != 0:
-        return win_num
+def minimax(is_max, grid, alpha, beta, depth, p_num):
+    if p_num == 1:
+        op_num = 2
+    else:
+        op_num = 1
+    if depth == 0:
+        return 0
 
     if is_full(grid):
         return 0
+    win = check_win(grid, p_num)
+    if win != 0:
+        return win
 
-    next_moves = []
     if is_max:
         best = MIN
+        for i in range(grid.shape[0]):
+            try:
+                val = minimax(False, add_piece(grid, p_num, i), alpha, beta, depth - 1, p_num)
+                best = max(best, val)
+                alpha = max(best, alpha)
+                if beta <= alpha:
+                    break
+
+            except IndexError:
+                pass
 
     else:
         best = MAX
-    for i in range(grid.shape[0]):
-        try:
-            val = (minimax(not is_max, add_piece(grid, p_num, i), player_dict, alpha, beta))
-            next_moves.append(val)
-            if is_max:
-                best = max(best, val)
-                alpha = max(best, alpha)
-
-
-            else:
+        for i in range(grid.shape[0]):
+            try:
+                val = minimax(True, add_piece(grid, op_num, i), alpha, beta, depth - 1, p_num)
                 best = min(best, val)
                 beta = min(beta, best)
+                if beta <= alpha:
+                    break
 
-            if beta <= alpha:
-                break
+            except IndexError:
+                pass
 
-
-        except IndexError:
-            if is_max:
-                next_moves.append(MIN)
-
-            else:
-                next_moves.append(MAX)
-
-    if is_max:
-        return max(next_moves)
-
-    else:
-        return min(next_moves)
+    return best
 
 
 def find_best_move(grid, p_num):
@@ -136,7 +133,7 @@ def find_best_move(grid, p_num):
     possible_moves = []
     for i in range(grid.shape[0]):
         try:
-            val = minimax(False, add_piece(grid, p_num, i), player_dict, alpha, beta)
+            val = minimax(False, add_piece(grid, p_num, i), alpha, beta, 10, p_num)
             best = max(best, val)
             alpha = max(best, alpha)
             possible_moves.append(val)
@@ -157,6 +154,7 @@ def add_piece(p_grid, p_num, column):
 
     raise IndexError
 
+
 def is_full(grid):
     for num in grid.flatten():
         if num == 0:
@@ -165,10 +163,13 @@ def is_full(grid):
     return True
 
 
-
 if __name__ == "__main__":
     grid = convert_to_np(Grid())
-    for i in range(3):
-        grid = add_piece(grid, 1, 1)
+    while True:
+        move = find_best_move(grid, 1)
+        grid = add_piece(grid, 1, move)
+        print(grid)
+        user_input = int(input())
+        grid = add_piece(grid, 2, user_input)
 
-    print(find_best_move(grid, 1))
+# May need a more sophisticated evaluate function in order to make it make better and faster moves
