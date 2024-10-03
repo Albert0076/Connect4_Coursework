@@ -5,7 +5,7 @@ import random
 MAX = 10
 MIN = -10
 
-
+pos_weights = [0, 1, 2, 3, 3, 2, 1 ,0]
 # Player 1: 1, Player 2: 2, Empty: 0
 
 
@@ -78,19 +78,78 @@ def check_win(grid, p_num: int):
     return 0
 
 
+def evaluate(grid, p_num, op_num):
+    three_count = 0
+    pos_count = 0
+    piece_count = 0
+    # use the same code as check win just only checking for three in a rows.
+    for i in range(grid.shape[0]):
+        for j in range(grid.shape[1]):
+            if grid[i, j] == p_num:
+                piece_count += 1
+                win_change = 1
+                pos_count += pos_weights[i]
+
+            elif grid[i, j] == op_num:
+                piece_count += 1
+                win_change = -1
+                pos_count -= pos_weights[i]
+
+            else:
+                win_change = 0
+            if grid[i, j] == 0:
+                break
+            try:  # Vertical
+                if grid[i, j] == grid[i + 1, j] == grid[i + 2, j]:
+                    three_count += win_change
+
+            except IndexError:
+                pass
+
+            try:
+                if grid[i, j] == grid[i, j + 1] == grid[i, j + 2]:
+                    three_count += win_change
+
+            except IndexError:
+                pass
+
+            try:
+                if grid[i, j] == grid[i + 1, j + 1] == grid[i + 2, j + 2]:
+                    three_count += win_change
+            except IndexError:
+                pass
+
+            try:
+                if grid[i, j] == grid[i + 1, j - 1] == grid[i + 2, j - 2]:
+                    three_count += win_change
+
+            except IndexError:
+                pass
+
+    return_val = 2*three_count + pos_count//piece_count
+    if return_val >= MAX:
+        return_val = MAX-1
+    if return_val <= MIN:
+        return_val = MIN+1
+
+
+    return return_val
+
+
 def minimax(is_max, grid, alpha, beta, depth, p_num):
     if p_num == 1:
         op_num = 2
     else:
         op_num = 1
-    if depth == 0:
-        return 0
-
-    if is_full(grid):
-        return 0
     win = check_win(grid, p_num)
     if win != 0:
         return win
+
+    if depth == 0:
+        return evaluate(grid, p_num, op_num)
+
+    if is_full(grid):
+        return 0
 
     if is_max:
         best = MIN
@@ -133,7 +192,7 @@ def find_best_move(grid, p_num):
     possible_moves = []
     for i in range(grid.shape[0]):
         try:
-            val = minimax(False, add_piece(grid, p_num, i), alpha, beta, 10, p_num)
+            val = minimax(False, add_piece(grid, p_num, i), alpha, beta, 8, p_num)
             best = max(best, val)
             alpha = max(best, alpha)
             possible_moves.append(val)
@@ -165,11 +224,13 @@ def is_full(grid):
 
 if __name__ == "__main__":
     grid = convert_to_np(Grid())
-    while True:
-        move = find_best_move(grid, 1)
-        grid = add_piece(grid, 1, move)
-        print(grid)
-        user_input = int(input())
-        grid = add_piece(grid, 2, user_input)
+    for i in range(3):
+        grid = add_piece(grid, 1, 5)
+    print(find_best_move(grid, 1))
+
+
+
+
+
 
 # May need a more sophisticated evaluate function in order to make it make better and faster moves
