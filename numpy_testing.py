@@ -36,19 +36,74 @@ kernel_3 = get_kernels(3)
 kernel_4 = get_kernels(4)
 
 
-def check_win(grid, p_num, op_num):
+def check_win_fft(grid, p_num, op_num):
     p_num_grid = np.copy(grid)
     op_num_grid = np.copy(grid)
     p_num_grid[p_num_grid != p_num] = 0
     p_num_grid[p_num_grid == p_num] = 1
     op_num_grid[op_num_grid != op_num] = 0
     op_num_grid[op_num_grid == op_num] = 1
-    if any([4 in signal.fftconvolve(p_num_grid, kernel) for kernel in kernel_4]):
-        return MAX
+    for i in range(4):
+        if 4.0 in signal.fftconvolve(p_num_grid, kernel_4[i]):
+            return 10
 
-    if any([4 in signal.fftconvolve(op_num_grid, kernel) for kernel in kernel_4]):
-        return MIN
+        if 4.0 in signal.fftconvolve(op_num_grid, kernel_4[i]):
+            return -10
+    return 0
 
+
+def check_win_2d_conv(grid, p_num, op_num):
+    p_num_grid = np.copy(grid)
+    op_num_grid = np.copy(grid)
+    p_num_grid[p_num_grid != p_num] = 0
+    p_num_grid[p_num_grid == p_num] = 1
+    op_num_grid[op_num_grid != op_num] = 0
+    op_num_grid[op_num_grid == op_num] = 1
+    for i in range(4):
+        if 4 in signal.convolve2d(p_num_grid, kernel_4[i]):
+            return 10
+
+        if 4 in signal.convolve2d(op_num_grid, kernel_4[i]):
+            return -10
+
+
+def check_win(grid, p_num):
+    win_num = 0
+    for i in range(grid.shape[0]):
+        for j in range(grid.shape[1]):
+            if grid[i, j] != 0:
+                if grid[i, j] == p_num:
+                    win_num = MAX
+
+                else:
+                    win_num = MIN
+                try:
+                    if grid[i, j] == grid[i, j + 1] == grid[i, j + 2] == grid[i, j + 3]:
+                        return win_num
+
+                except IndexError:
+                    pass
+
+                try:
+                    if grid[i, j] == grid[i + 1, j] == grid[i + 2, j] == grid[i + 3, j]:
+                        return win_num
+
+                except IndexError:
+                    pass
+
+                try:
+                    if grid[i, j] == grid[i + 1, j + 1] == grid[i + 2, j + 2] == grid[i + 3, j + 3]:
+                        return win_num
+
+                except IndexError:
+                    pass
+
+                try:
+                    if grid[i, j] == grid[i - 1, j + 1] == grid[i - 2, j + 2] == grid[i - 3, j + 3]:
+                        return win_num
+
+                except IndexError:
+                    pass
     return 0
 
 
@@ -60,9 +115,12 @@ def evaluate(grid, p_num, op_num):
     op_num_grid[op_num_grid != op_num] = 0
     op_num_grid[op_num_grid == op_num] = 1
     three_count = 0
+    pos_array = np.array([[1], [2], [3], [4], [3], [2], [1]])
+    p_pos = np.sum(np.matmul(pos_array, p_num_grid))
+    op_pos = np.sum(np.matmul(pos_array, op_num_grid))
     for kernel in kernel_3:
-        three_count += np.sum(signal.fftconvolve(p_num_grid, kernel) == 3)
-        three_count -= np.sum(signal.fftconvolve(op_num_grid, kernel) == 3)
+        three_count += np.sum(signal.convolve2d(p_num_grid, kernel) == 3)
+        three_count -= np.sum(signal.convolve2d(op_num_grid, kernel) == 3)
 
     return_val = 2 * three_count
     if return_val >= MAX:
@@ -78,7 +136,7 @@ def minimax(is_max, grid, alpha, beta, depth, p_num):
         op_num = 2
     else:
         op_num = 1
-    win = check_win(grid, p_num, op_num)
+    win = check_win(grid, p_num)
     if win != 0:
         return win
 
@@ -155,6 +213,7 @@ def is_full(grid):
 
 
 if __name__ == "__main__":
-    pass
+    grid = convert_to_np(Grid())
+
 
 # May need a more sophisticated evaluate function in order to make it make better and faster moves
