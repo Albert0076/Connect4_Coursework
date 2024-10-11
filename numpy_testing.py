@@ -115,9 +115,9 @@ def evaluate(grid, p_num, op_num):
     op_num_grid[op_num_grid != op_num] = 0
     op_num_grid[op_num_grid == op_num] = 1
     three_count = 0
-    pos_array = np.array([[1], [2], [3], [4], [3], [2], [1]])
-    p_pos = np.sum(np.matmul(pos_array, p_num_grid))
-    op_pos = np.sum(np.matmul(pos_array, op_num_grid))
+    pos_array = np.array([[1], [1], [1], [4], [3], [2], [1]])
+    p_pos = np.dot(pos_array, np.matmul(p_num_grid, np.matrix([[1] for i in range(6)]))]
+    op_pos =
     for kernel in kernel_3:
         three_count += np.sum(signal.convolve2d(p_num_grid, kernel) == 3)
         three_count -= np.sum(signal.convolve2d(op_num_grid, kernel) == 3)
