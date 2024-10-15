@@ -115,20 +115,25 @@ def evaluate(grid, p_num, op_num):
     op_num_grid[op_num_grid != op_num] = 0
     op_num_grid[op_num_grid == op_num] = 1
     three_count = 0
-    pos_array = np.array([[1], [1], [1], [4], [3], [2], [1]])
-    p_pos = np.dot(pos_array, np.matmul(p_num_grid, np.matrix([[1] for i in range(6)]))]
-    op_pos =
+    pos_array = np.array([1, 2, 3, 4, 3, 2, 1])
+    flatten_array = np.array([[1] for i in range(6)])
+    p_num_flattened = np.rot90(np.matmul(p_num_grid, flatten_array))
+    op_num_flattened = np.rot90(np.matmul(op_num_grid, flatten_array))
+    p_pos = np.dot(pos_array, p_num_flattened[0])
+    op_pos = np.dot(pos_array, op_num_flattened[0])
+    total_num = np.sum(p_num_flattened) + np.sum(op_num_flattened)
     for kernel in kernel_3:
         three_count += np.sum(signal.convolve2d(p_num_grid, kernel) == 3)
         three_count -= np.sum(signal.convolve2d(op_num_grid, kernel) == 3)
 
-    return_val = 2 * three_count
+    return_val = round(3 * three_count + p_pos/ (total_num*2))
     if return_val >= MAX:
         return_val = MAX - 1
+
     if return_val <= MIN:
         return_val = MIN + 1
 
-    return return_val
+    return p_pos/total_num
 
 
 def minimax(is_max, grid, alpha, beta, depth, p_num):
@@ -214,6 +219,13 @@ def is_full(grid):
 
 if __name__ == "__main__":
     grid = convert_to_np(Grid())
+    while True:
+        move = find_best_move(grid, 1)
+        print(move)
+        grid = add_piece(grid, 1, move)
+        print(grid)
+        user_move = int(input())
+        grid = add_piece(grid, 2, user_move)
 
 
 # May need a more sophisticated evaluate function in order to make it make better and faster moves
