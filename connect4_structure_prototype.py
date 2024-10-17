@@ -3,6 +3,7 @@ class Grid:
         self.win_num = win_num
         self.num_rows = num_rows
         self.num_columns = num_columns
+        self.winning_symbol = None
 
         self.cells = {(i, j): Cell(i, j) for i in range(self.num_rows) for j in range(self.num_columns)}
 
@@ -30,19 +31,15 @@ class Grid:
             else:
                 count += 1
 
-        return added
+        if not added:
+            raise IndexError("Column is full.")
 
     def check_win(self):
-        for line in self.all_lines:
-            checked_line = self.check_line(line)
-            if checked_line[0]:
-                return checked_line
-
-        return False, None
+        return any([self.check_line(line) for line in self.all_lines])
 
     def check_line(self, line):
         if len(line) < self.win_num:
-            return False, None
+            return False
 
         else:
             for i in range(len(line) - self.win_num):
@@ -52,9 +49,10 @@ class Grid:
                         won = False
 
                 if won:
-                    return True, self.cells[line[i]].symbol
+                    self.winning_symbol = self.cells[line[i]].symbol
+                    return True
 
-        return False, None
+        return False
 
     def __repr__(self):
         return f"Grid({self.num_rows=}, {self.num_columns=}, {self.win_num=})"
