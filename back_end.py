@@ -21,10 +21,18 @@ class Game:
         while not self.game_over:
             current_player = self.players[self.current_player_num]
             if not isinstance(current_player, ComputerPlayer):
-                self.grid.add_piece(self.interface.get_move(self, current_player), current_player.symbol)
+                move_made = False
+                while not move_made:
+                    try:
+                        self.grid.add_piece(self.interface.get_move(self, current_player), current_player.symbol)
+                        move_made = True
+                    except IndexError as error:
+                        self.interface.display_invalid_move(error)
 
             else:
                 self.grid.add_piece(current_player.get_move(), current_player.symbol)
+
+            self.interface.display_grid()
 
             if self.grid.check_win():
                 self.game_over = True
@@ -52,5 +60,3 @@ class ComputerPlayer(Player):
 
     def get_move(self):
         pass
-
-
