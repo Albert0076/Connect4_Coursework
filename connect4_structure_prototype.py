@@ -62,15 +62,15 @@ class Grid:
         for i in range(len(self.rows) - 1, -1, -1):
             for cell in self.rows[i]:
                 if self.cells[cell].is_empty():
-                    return_str += "_ "
+                    return_str += "|_| "
 
                 else:
-                    return_str += self.cells[cell].symbol[0] + " "
+                    return_str += "|" + self.cells[cell].symbol[0] + "| "
 
             return_str += "\n"
 
         for i in range(len(self.columns)):
-            return_str += f"{i + 1} "
+            return_str += f" {i + 1}  "
 
         return return_str
 
