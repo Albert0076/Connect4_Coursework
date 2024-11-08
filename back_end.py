@@ -28,6 +28,7 @@ class Game:
             current_player = self.players[self.current_player_num]
             if not isinstance(current_player, ComputerPlayer):
                 move_made = False
+                move = None
                 while not move_made:
                     try:
                         move = self.interface.get_move(self, current_player)
@@ -35,8 +36,8 @@ class Game:
                         move_made = True
                     except IndexError as error:
                         self.interface.display_invalid_move(error)
-                #To-do
-                #self.add_to_past_dict(move)
+
+                self.add_to_past_dict(move)
 
             else:
                 self.grid.add_piece(current_player.get_move(), current_player.symbol)
@@ -51,7 +52,11 @@ class Game:
                 self.current_player_num = (self.current_player_num + 1) % len(self.players)
 
     def add_to_past_dict(self, move_made):
-        self.past_states[self.turn_num] = copy.deepcopy(self.grid), move_made
+        self.past_states[self.turn_num] = copy.deepcopy(self.grid), move_made, self.grid.column_height(move_made)
+
+    def evaluate_move(self, move):
+        # This will look at the dictionary of moves and evaluate the move made on a scale of -10 to 10
+        pass
 
 
 class Player:

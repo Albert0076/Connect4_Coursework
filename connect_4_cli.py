@@ -1,5 +1,6 @@
 from back_end import Game, Player
 import pyinputplus
+from colorama import Fore, Style
 
 
 class CLI:
@@ -7,13 +8,15 @@ class CLI:
                              "Medium": 2,
                              "Hard": 3}
 
+    colours = {"R": Fore.RED, "B": Fore.BLUE, "G": Fore.GREEN, "Y": Fore.YELLOW}
+
     def __init__(self):
         self.game = None
         self.setup()
 
     def setup(self):
         print(f'Use default rules? Y/N')
-        default_rules = pyinputplus.inputYesNo() == "Y"
+        default_rules = pyinputplus.inputYesNo() == "yes"
         if not default_rules:
             columns = pyinputplus.inputInt("Enter columns: ", min=1)
             rows = pyinputplus.inputInt("Enter rows: ", min=1)
@@ -34,8 +37,10 @@ class CLI:
         computer_choice = pyinputplus.inputChoice(["Human", "Computer"])
         player_name = pyinputplus.inputStr("Enter player name: ",
                                            blockRegexes=[player.name for player in self.game.players])
-        player_symbol = pyinputplus.inputStr("Enter Symbol (must be one letter): ",
-                                             limit=1, blockRegexes=[player.symbol for player in self.game.players])
+        print("Enter Symbol: ")
+        symbol_choices = [colour if colour not in [player.symbol for player in self.game.players]
+                          else "Do Not Say This Please" for colour in CLI.colours.keys()]
+        player_symbol = pyinputplus.inputChoice(symbol_choices)
         if computer_choice == "Human":
             self.game.add_human_player(player_name, player_symbol)
 
@@ -50,16 +55,39 @@ class CLI:
         print(f"Player: {player.name} has won the game!")
         print(f"The game took {self.game.turn_num} turns.")
 
-    def display_grid(self):
-        print(self.game.grid)
+    def display_grid(self, grid=None, highlighted_moves=[]):
+        if grid is None:
+            grid = self.game.grid
+        return_str = ""
+        for i in range(len(grid.rows) - 1, -1, -1):
+            for cell in grid.rows[i]:
+                if grid.cells[cell].is_empty():
+                    return_str += "|_| "
+
+                else:
+                    bright = ""
+                    for move in highlighted_moves:
+                        if cell== move :
+                            bright = Style.BRIGHT
+
+                    symbol = grid.cells[cell].symbol
+                    return_str += "|" + CLI.colours[symbol] + bright + grid.cells[cell].symbol[
+                        0] + Style.RESET_ALL + Fore.RESET + "| "
+
+            return_str += "\n"
+
+        for i in range(len(grid.columns)):
+            return_str += f" {i + 1}  "
+
+        print(return_str)
 
     def analyse_game(self):
-        player_choice = pyinputplus.inputYesNo("Do you want to analyse game. Y/N")
+        player_choice = pyinputplus.inputYesNo("Do you want to analyse game. Y/N") == "yes"
         while player_choice:
             turn_choice = pyinputplus.inputInt("What turn do you want to look at: ", min=0, max=self.game.turn_num)
-
-
-
+            turn = self.game.past_states[turn_choice]
+            self.display_grid(grid=turn[0], highlighted_moves=[(turn[1], turn[2])])
+            player_choice = pyinputplus.inputYesNo("Do you want to analyse a different turn. Y/N") == "yes"
 
     @staticmethod
     def display_invalid_move(error):

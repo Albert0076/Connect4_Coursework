@@ -20,6 +20,11 @@ class Grid:
 
         self.all_lines = self.columns + self.rows + self.SW_diagonals + self.SE_diagonals
 
+    def column_height(self, column):
+        if column is None:
+            return None
+        return sum([1 if not self.cells[cell].is_empty() else 0 for cell in self.columns[column]])
+
     def add_piece(self, column, symbol):
         added = False
         count = 0
@@ -101,7 +106,6 @@ if __name__ == "__main__":
             grid.add_piece(i, "Yellow")
 
         grid.add_piece(i, "Red")
-
 
     print(grid)
     print(grid.check_win())
