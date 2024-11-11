@@ -12,6 +12,8 @@ class CLI:
 
     def __init__(self):
         self.game = None
+        self.colours = [key for key in CLI.colours.keys()]
+
         self.setup()
 
     def setup(self):
@@ -26,7 +28,7 @@ class CLI:
         else:
             self.game = Game(self)
 
-        for i in range(2):
+        for _ in range(2):
             self.add_player()
 
         self.game.play_game()
@@ -38,9 +40,8 @@ class CLI:
         player_name = pyinputplus.inputStr("Enter player name: ",
                                            blockRegexes=[player.name for player in self.game.players])
         print("Enter Symbol: ")
-        symbol_choices = [colour if colour not in [player.symbol for player in self.game.players]
-                          else "Do Not Say This Please" for colour in CLI.colours.keys()]
-        player_symbol = pyinputplus.inputChoice(symbol_choices)
+        player_symbol = pyinputplus.inputChoice(self.colours)
+        self.colours.remove(player_symbol)
         if computer_choice == "Human":
             self.game.add_human_player(player_name, player_symbol)
 
@@ -55,9 +56,12 @@ class CLI:
         print(f"Player: {player.name} has won the game!")
         print(f"The game took {self.game.turn_num} turns.")
 
-    def display_grid(self, grid=None, highlighted_moves=[]):
+    def display_grid(self, grid=None, highlighted_moves=None):
+        if highlighted_moves is None:
+            highlighted_moves = []
         if grid is None:
             grid = self.game.grid
+
         return_str = ""
         for i in range(len(grid.rows) - 1, -1, -1):
             for cell in grid.rows[i]:
@@ -67,7 +71,7 @@ class CLI:
                 else:
                     bright = ""
                     for move in highlighted_moves:
-                        if cell== move :
+                        if cell == move:
                             bright = Style.BRIGHT
 
                     symbol = grid.cells[cell].symbol
@@ -82,11 +86,12 @@ class CLI:
         print(return_str)
 
     def analyse_game(self):
+        print(self.game.past_states)
         player_choice = pyinputplus.inputYesNo("Do you want to analyse game. Y/N") == "yes"
         while player_choice:
-            turn_choice = pyinputplus.inputInt("What turn do you want to look at: ", min=0, max=self.game.turn_num)
-            turn = self.game.past_states[turn_choice]
-            self.display_grid(grid=turn[0], highlighted_moves=[(turn[1], turn[2])])
+            turn_choice = pyinputplus.inputInt("What turn do you want to look at: ", min=1, max=self.game.turn_num)
+            turn = self.game.past_states[turn_choice - 1]
+            self.display_grid(grid=turn[0], highlighted_moves=[(turn[2], turn[1])])
             player_choice = pyinputplus.inputYesNo("Do you want to analyse a different turn. Y/N") == "yes"
 
     @staticmethod

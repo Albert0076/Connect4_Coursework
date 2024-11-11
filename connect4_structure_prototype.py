@@ -20,12 +20,18 @@ class Grid:
 
         self.all_lines = self.columns + self.rows + self.SW_diagonals + self.SE_diagonals
 
-    def column_height(self, column):
-        if column is None:
-            return None
+    def column_height(self, column: int):
+        """
+        :param column: column number
+        :return: the number of full cells in the column
+        :raise:
+            ValueError if column is not an integer or is not in the grid
+        """
+        if not isinstance(column, int) or -1 <= column <= self.num_columns:
+            raise ValueError
         return sum([1 if not self.cells[cell].is_empty() else 0 for cell in self.columns[column]])
 
-    def add_piece(self, column, symbol):
+    def add_piece(self, column: int, symbol: str):
         added = False
         count = 0
         while not added and count < self.num_columns:
@@ -42,7 +48,7 @@ class Grid:
     def check_win(self):
         return any([self.check_line(line) for line in self.all_lines])
 
-    def check_line(self, line):
+    def check_line(self, line: list):
         if len(line) < self.win_num:
             return False
 
@@ -81,7 +87,7 @@ class Grid:
 
 
 class Cell:
-    def __init__(self, i, j):
+    def __init__(self, i: int, j: int):
         self.row = i
         self.column = j
         self.symbol = None
@@ -89,7 +95,7 @@ class Cell:
     def is_empty(self):
         return self.symbol is None
 
-    def set_symbol(self, symbol):
+    def set_symbol(self, symbol: str):
         self.symbol = symbol
 
     def __eq__(self, other):

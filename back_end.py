@@ -52,9 +52,13 @@ class Game:
                 self.current_player_num = (self.current_player_num + 1) % len(self.players)
 
     def add_to_past_dict(self, move_made):
-        self.past_states[self.turn_num] = copy.deepcopy(self.grid), move_made, self.grid.column_height(move_made)
+        if move_made is None:
+            self.past_states[self.turn_num] = copy.deepcopy(self.grid), None, None
 
-    def evaluate_move(self, move):
+        else:
+            self.past_states[self.turn_num] = copy.deepcopy(self.grid), move_made, self.grid.column_height(move_made)-1
+
+    def evaluate_move(self, move: int):
         # This will look at the dictionary of moves and evaluate the move made on a scale of -10 to 10
         pass
 
