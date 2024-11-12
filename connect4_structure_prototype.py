@@ -27,7 +27,7 @@ class Grid:
         :raise:
             ValueError if column is not an integer or is not in the grid
         """
-        if not isinstance(column, int) or -1 <= column <= self.num_columns:
+        if not (isinstance(column, int) and -1 <= column <= self.num_columns):
             raise ValueError
         return sum([1 if not self.cells[cell].is_empty() else 0 for cell in self.columns[column]])
 

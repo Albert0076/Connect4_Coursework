@@ -4,15 +4,16 @@ from colorama import Fore, Style
 
 
 class CLI:
-    difficulty_dictionary = {"Easy": 1,
+    difficulty_dictionary = {"Very Easy": 0,
+                             "Easy": 1,
                              "Medium": 2,
-                             "Hard": 3}
+                             "Hard": 3, }
 
-    colours = {"R": Fore.RED, "B": Fore.BLUE, "G": Fore.GREEN, "Y": Fore.YELLOW}
+    colours = {"R": Fore.RED, "B": Fore.BLUE, "G": Fore.GREEN, "Y": Fore.YELLOW, }
 
     def __init__(self):
         self.game = None
-        self.colours = [key for key in CLI.colours.keys()]
+        self.symbols = [key for key in CLI.colours.keys()]
 
         self.setup()
 
@@ -40,16 +41,17 @@ class CLI:
         player_name = pyinputplus.inputStr("Enter player name: ",
                                            blockRegexes=[player.name for player in self.game.players])
         print("Enter Symbol: ")
-        player_symbol = pyinputplus.inputChoice(self.colours)
-        self.colours.remove(player_symbol)
+        player_symbol = pyinputplus.inputChoice(self.symbols)
+        self.symbols.remove(player_symbol)
         if computer_choice == "Human":
             self.game.add_human_player(player_name, player_symbol)
 
         else:
-            difficulty = pyinputplus.inputChoice(["Easy", "Medium", "Hard"], "Enter difficulty: ")
+            print("Choose Difficulty: ")
+            difficulty = pyinputplus.inputChoice([key for key in CLI.difficulty_dictionary.keys()])
             self.game.add_computer_player(player_name, CLI.difficulty_dictionary[difficulty], player_symbol)
 
-    def get_move(self, game: Game, player: Player):
+    def get_move(self, player: Player):
         return pyinputplus.inputInt(f"Player: {player.name}, enter column: ", min=1, max=self.game.num_columns) - 1
 
     def display_win(self, player: Player):
@@ -86,7 +88,6 @@ class CLI:
         print(return_str)
 
     def analyse_game(self):
-        print(self.game.past_states)
         player_choice = pyinputplus.inputYesNo("Do you want to analyse game. Y/N") == "yes"
         while player_choice:
             turn_choice = pyinputplus.inputInt("What turn do you want to look at: ", min=1, max=self.game.turn_num)

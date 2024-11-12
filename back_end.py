@@ -1,5 +1,6 @@
 from connect4_structure_prototype import Grid
 import copy
+import random
 
 
 class Game:
@@ -26,21 +27,17 @@ class Game:
         self.add_to_past_dict(None)
         while not self.game_over:
             current_player = self.players[self.current_player_num]
-            if not isinstance(current_player, ComputerPlayer):
-                move_made = False
-                move = None
-                while not move_made:
-                    try:
-                        move = self.interface.get_move(self, current_player)
-                        self.grid.add_piece(move, current_player.symbol)
-                        move_made = True
-                    except IndexError as error:
-                        self.interface.display_invalid_move(error)
+            move_made = False
+            move = None
+            while not move_made:
+                try:
+                    move = current_player.get_move()
+                    self.grid.add_piece(move, current_player.symbol)
+                    move_made = True
+                    self.add_to_past_dict(move)
 
-                self.add_to_past_dict(move)
-
-            else:
-                self.grid.add_piece(current_player.get_move(), current_player.symbol)
+                except IndexError as error:
+                    current_player.register_error(error)
 
             self.interface.display_grid()
             self.turn_num += 1
@@ -56,7 +53,8 @@ class Game:
             self.past_states[self.turn_num] = copy.deepcopy(self.grid), None, None
 
         else:
-            self.past_states[self.turn_num] = copy.deepcopy(self.grid), move_made, self.grid.column_height(move_made)-1
+            self.past_states[self.turn_num] = copy.deepcopy(self.grid), move_made, self.grid.column_height(
+                move_made) - 1
 
     def evaluate_move(self, move: int):
         # This will look at the dictionary of moves and evaluate the move made on a scale of -10 to 10
@@ -73,6 +71,12 @@ class Player:
         else:
             self.symbol = symbol
 
+    def get_move(self):
+        return self.game.interface.get_move(self)
+
+    def register_error(self, error):
+        self.game.interface.display_invalid_move(error)
+
 
 class ComputerPlayer(Player):
     def __init__(self, game: Game, name: str, difficulty: int, symbol=""):
@@ -80,4 +84,13 @@ class ComputerPlayer(Player):
         self.difficulty = difficulty
 
     def get_move(self):
+        if self.difficulty == 0:
+            return self.very_easy()
+
+        return 0
+
+    def very_easy(self):
+        return random.randint(0, self.game.num_columns - 1)
+
+    def register_error(self, error):
         pass
