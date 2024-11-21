@@ -6,28 +6,34 @@ from connect4_structure_prototype import Grid
 
 def get_bit_mask(grid: Grid, player):
     position, mask = '', ''
-    for j in range(6, -1, -1):
+    for column in range(7):
         # We add an extra row at the top to store the board as 2 64-bit binary numbers
+        for row in range(0, 6):
+            mask += ['0', '1'][not grid.cells[(row, column)].is_empty()]
+            position += ['0', '1'][grid.cells[(row, column)].symbol == player]
+
         mask += '0'
         position += '0'
-        for i in range(0, 6):
-            mask += ['0', '1'][not grid.cells[(i, j)].is_empty()]
-            position += ['0', '1'][grid.cells[(i, j)].symbol == player]
+
 
     return int(position, 2), int(mask, 2)
 
 
 def print_grid(grid_int):
     grid_str = format(grid_int, '049b')
-    out_str = [[" " for j in range(7)] + ["\n"] for i in range(6, -1, -1)]
-    i, j = 6, 6
+    output_list = [[" " for j in range(7)] for i in range(7)]
+    i, j = 7, 0
     for symbol in grid_str:
-        out_str[i][j] = symbol
-        i = (i+1) % 7
-        if i == 6:
-            j -= 1
+        i = (i - 1) % 7
+        output_list[i][j] = symbol
+        if i == 0:
+            j += 1
 
-    return "".join(["".join(str_list) for str_list in out_str[::-1]])
+    str_list_1 = ["".join(column_list) + "\n" for column_list in output_list]
+    return "".join(str_list_1)
+
+
+
 
 
 
@@ -60,8 +66,6 @@ def check_four_in_a_row(position):
 
 def make_move(position, mask, column):
     new_position = position ^ mask # The new position will be the opponent's position which we get from doing an XOR
-    v = print_grid((1 << (column*7)))
-    u = print_grid(mask +(1 << (column*7)))
     # mask + (1 << (column*7)) will give an empty grid with 1 piece in the column, adding this to the mask will carry the bit until it is at the top of the column
     new_mask = mask | (mask + (1 << (column * 7)))
     return new_position, new_mask
@@ -75,15 +79,10 @@ def make_move(position, mask, column):
 
 if __name__ == "__main__":
     grid = Grid()
-    for i in range(4):
-        for j in range(i):
-            grid.add_piece(i, "Y")
-
-        grid.add_piece(i, "R")
+    grid.add_piece(0, "Y")
+    grid.add_piece(4, "R")
 
     b_grid = get_bit_mask(grid, "Y")
-    print(b_grid)
-    out_grid = make_move(b_grid[0], b_grid[1], 5)
-    print(print_grid(b_grid[0]) + "\n" +  print_grid(out_grid[0]))
-    print(print_grid(b_grid[1]) + "\n" + print_grid(out_grid[1]))
+    print(print_grid(b_grid[0]))
+    print(print_grid(b_grid[1]))
 
