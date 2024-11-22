@@ -4,6 +4,7 @@
 
 from connect4_structure_prototype import Grid
 import numpy as np
+from collections import defaultdict
 
 FULL_GRID = 558517276622718
 
@@ -64,7 +65,7 @@ def check_four_in_a_row(position):
 
 
 def is_invalid_board(mask):
-    return any([mask & (1 << ((7 * i) -1)) for i in range(1, 7)]) # Might not be working properly
+    return any([mask & (1 << ((7 * i) - 1)) for i in range(1, 8)])  # Might not be working properly
 
 
 def make_move(position, mask, column):
@@ -98,7 +99,7 @@ def minimax_alpha_beta(position, mask, is_max, alpha=-np.inf, beta=np.inf):
         best = np.inf
 
     for state in next_states:
-        val = minimax_alpha_beta(state[0], state[1],not is_max, alpha, beta)
+        val = minimax_alpha_beta(state[0], state[1], not is_max, alpha, beta)
         if is_max:
             best = max(best, val)
             alpha = max(best, alpha)
@@ -115,25 +116,25 @@ def minimax_alpha_beta(position, mask, is_max, alpha=-np.inf, beta=np.inf):
     return best
 
 
-if __name__ == "__main__":
-    grid_0, grid_1, grid_2, grid_3 = Grid(), Grid(), Grid(), Grid()
-    for i in range(2, -1, -1):
-        grid_0.add_piece(0, "Y")
-        grid_1.add_piece(i, "Y")
-        for j in range(i):
-            grid_2.add_piece(i, "R")
+def find_best_move(position, mask):
+    values = []
+    for i in range(7):
+        state = make_move(position, mask, i)
+        if is_invalid_board(state[1]):
+            values.append(None)  # None is for an illegal move that cannot be made
 
-        grid_2.add_piece(i, "Y")
+        else:
+            values.append(minimax_alpha_beta(state[0], state[1], False))
+
+    return values
+
+
+if __name__ == "__main__":
+    grid_0 = Grid()
+    for i in range(3):
+        grid_0.add_piece(0, "Y")
 
     grid_0 = get_bit_mask(grid_0, "Y")
-    print(print(grid_0[1]))
-    print(minimax_alpha_beta(grid_0[0], grid_0[1], False))
 
 
-
-
-
-
-
-
-
+    print(minimax_alpha_beta(grid_0[0], grid_0[1], True))
