@@ -5,7 +5,10 @@
 from connect4_structure_prototype import Grid
 import numpy as np
 from collections import defaultdict
+import time
+from random import randint
 
+cache = defaultdict(lambda: None) # cache may not be working properly because it doesn't account for whose turn it is
 FULL_GRID = 558517276622718
 
 
@@ -65,7 +68,7 @@ def check_four_in_a_row(position):
 
 
 def is_invalid_board(mask):
-    return any([mask & (1 << ((7 * i) - 1)) for i in range(1, 8)])  # Might not be working properly
+    return any([mask & (1 << ((7 * i) - 1)) for i in range(1, 8)])
 
 
 def make_move(position, mask, column):
@@ -99,7 +102,12 @@ def minimax_alpha_beta(position, mask, is_max, alpha=-np.inf, beta=np.inf):
         best = np.inf
 
     for state in next_states:
-        val = minimax_alpha_beta(state[0], state[1], not is_max, alpha, beta)
+        if not cache[(state[0], state[1])] is None:
+            val = cache[(state[0], state[1])]
+        else:
+            val = minimax_alpha_beta(state[0], state[1], not is_max, alpha, beta)
+            cache[(state[0], state[1])] = val
+
         if is_max:
             best = max(best, val)
             alpha = max(best, alpha)
@@ -129,6 +137,34 @@ def find_best_move(position, mask):
     return values
 
 
+def generate_random_grid(n):
+    grid = Grid()
+    grid_made = False
+    while not grid_made:
+        for i in range(n):
+            move_made = False
+            if i%2 == 0:
+                symbol = "R"
+
+            else:
+                symbol = "B"
+
+            while not move_made:
+                try:
+                    grid.add_piece(randint(0, 7), symbol)
+                    move_made = True
+
+                except IndexError:
+                    pass
+
+        grid_made = not grid.check_win()
+
+    return grid
+
+
+
+
+
 if __name__ == "__main__":
     grid_0 = Grid()
     for i in range(3):
@@ -136,5 +172,16 @@ if __name__ == "__main__":
 
     grid_0 = get_bit_mask(grid_0, "Y")
 
+    # Starting player wins, optimal move is 4
+    test_board_position = int("0000010000101000000110010101000011000110100000001", 2)
+    test_board_mask = int("0000111001111100001110111111000111101111110000001", 2)
+    print(print_grid(test_board_position))
+    print(print_grid(test_board_mask))
+    print(minimax_alpha_beta(test_board_position, test_board_mask, True))
+    print(find_best_move(test_board_position, test_board_mask))
+    # Code seems to be working as it correctly identifies red's winning move.
 
-    print(minimax_alpha_beta(grid_0[0], grid_0[1], True))
+
+
+
+

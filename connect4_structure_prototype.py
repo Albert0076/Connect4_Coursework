@@ -53,7 +53,7 @@ class Grid:
             return False
 
         else:
-            for i in range(len(line) - self.win_num):
+            for i in range(len(line) - self.win_num + 1):
                 won = True
                 for j in range(self.win_num - 1):
                     if self.cells[line[i + j]] != self.cells[line[i + j + 1]]:
