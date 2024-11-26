@@ -1,6 +1,7 @@
 # A lot of the work on this file is taken from this article:
 # https://towardsdatascience.com/creating-the-perfect-connect-four-ai-bot-c165115557b0
 # A lot of the minimax code is base on code from: https://github.com/aimacode/aima-python/blob/master/games.py
+from itertools import count
 
 from connect4_structure_prototype import Grid
 import numpy as np
@@ -12,7 +13,7 @@ cache = defaultdict(lambda: None) # cache may not be working properly because it
 FULL_GRID = 558517276622718
 
 
-# The Grid will be represented by an 7x7 grid with the top row being always empty, it will be represented by 8 8bit binary numbers with each byte representing a column
+# The Grid will be represented by a 7x7 grid with the top row being always empty, it will be represented by 7 7bit binary numbers with each byte representing a column
 
 def get_bit_mask(grid: Grid, player):
     position, mask = '', ''
@@ -65,6 +66,36 @@ def check_four_in_a_row(position):
         return True
 
     return False
+
+
+def evaluate_board(position, mask):
+    op_position = position ^ mask
+    three_in_a_row = count_three_in_a_row(position) - count_three_in_a_row(op_position)
+    # Very simple for now
+    return three_in_a_row
+
+
+
+
+def count_three_in_a_row(position):
+    total = 0
+    shift = position & (position >> 7)
+    total += (shift & (shift >> 7)).bit_count()
+
+    shift = position & (position >> 6)
+    total += (shift & (shift >> 6)).bit_count()
+
+    shift = position & (position >> 8)
+    total += (shift & (shift >> 8)).bit_count()
+
+    shift = position & (position >> 1)
+    total += (shift & (shift >> 1)).bit_count()
+
+    return total
+
+
+
+
 
 
 def is_invalid_board(mask):
@@ -123,8 +154,58 @@ def minimax_alpha_beta(position, mask, is_max, alpha=-np.inf, beta=np.inf):
 
     return best
 
+def minimax_alpha_beta_depth(position, mask, is_max, depth, alpha=-np.inf, beta=np.inf):
+    if depth == 0:
+        val = evaluate_board(position, mask)
+        if is_max:
+            return val
+        else:
+            return -val
+    if check_four_in_a_row(position ^ mask):
+        if is_max:
+            return -np.inf
 
-def find_best_move(position, mask):
+        else:
+            return np.inf
+
+    # Checks to see if grid is full
+    if mask == FULL_GRID:
+        return 0
+
+    next_states = [make_move(position, mask, column) for column in range(7)]
+    next_states = [state for state in next_states if (not is_invalid_board(state[1]))]
+
+    if is_max:
+        best = -np.inf
+
+    else:
+        best = np.inf
+
+    for state in next_states:
+        if not cache[(state[0], state[1])] is None:
+            val = cache[(state[0], state[1])]
+        else:
+            val = minimax_alpha_beta_depth(state[0], state[1],not is_max, depth-1, alpha, beta)
+            cache[(state[0], state[1])] = val
+
+        if is_max:
+            best = max(best, val)
+            alpha = max(best, alpha)
+            if beta <= alpha:
+                return alpha
+
+
+        else:
+            best = min(best, val)
+            beta = min(beta, val)
+            if beta <= alpha:
+                return beta
+
+    return best
+
+
+
+def find_best_move(position, mask, depth):
     values = []
     for i in range(7):
         state = make_move(position, mask, i)
@@ -132,7 +213,7 @@ def find_best_move(position, mask):
             values.append(None)  # None is for an illegal move that cannot be made
 
         else:
-            values.append(minimax_alpha_beta(state[0], state[1], False))
+            values.append(minimax_alpha_beta_depth(state[0], state[1], False, depth))
 
     return values
 
@@ -178,8 +259,10 @@ if __name__ == "__main__":
     print(print_grid(test_board_position))
     print(print_grid(test_board_mask))
     print(minimax_alpha_beta(test_board_position, test_board_mask, True))
-    print(find_best_move(test_board_position, test_board_mask))
+    print(find_best_move(test_board_position, test_board_mask, 20))
     # Code seems to be working as it correctly identifies red's winning move.
+    grid = get_bit_mask(Grid(), "Y")
+    print(find_best_move(grid[0], grid[1], 10))
 
 
 
