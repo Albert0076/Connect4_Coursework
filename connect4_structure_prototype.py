@@ -65,6 +65,12 @@ class Grid:
 
         return False
 
+    def line_full(self, line):
+        return all([self.cells[index].is_empty() for index in line])
+
+    def grid_full(self):
+        return all([self.line_full(line) for line in self.all_lines])
+
     def __repr__(self):
         return f"Grid({self.num_rows=}, {self.num_columns=}, {self.win_num=})"
 

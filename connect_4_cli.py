@@ -58,6 +58,9 @@ class CLI:
         print(f"Player: {player.name} has won the game!")
         print(f"The game took {self.game.turn_num} turns.")
 
+    def display_draw(self):
+        print("The Grid is full and the game has ended in a draw")
+
     def display_grid(self, grid=None, highlighted_moves=None):
         if highlighted_moves is None:
             highlighted_moves = []

@@ -1,6 +1,7 @@
 from connect4_structure_prototype import Grid
 import copy
 import random
+from binary_string_minimax_test import find_best_move, get_bit_mask
 
 
 class Game:
@@ -45,6 +46,10 @@ class Game:
                 self.game_over = True
                 self.interface.display_win(current_player)
 
+            elif self.grid.grid_full():
+                self.game_over = True
+                self.interface.display_draw()
+
             else:
                 self.current_player_num = (self.current_player_num + 1) % len(self.players)
 
@@ -87,10 +92,21 @@ class ComputerPlayer(Player):
         if self.difficulty == 0:
             return self.very_easy()
 
+        if self.difficulty == 3:
+            return self.hard()
+
         return 0
 
     def very_easy(self):
         return random.randint(0, self.game.num_columns - 1)
+
+    def hard(self):
+        # Temporary may eventually have a computer class that returns the ranking of all the moves
+        binary_grid  = get_bit_mask(self.game.grid, self.symbol)
+        values = find_best_move(binary_grid[0], binary_grid[1], 10)
+        return values.index(max([value for value in values if not value is None]))
+
+
 
     def register_error(self, error):
         pass

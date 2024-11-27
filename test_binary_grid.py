@@ -1,5 +1,5 @@
 import pytest
-from binary_string_minimax_test import get_bit_mask, check_three_in_a_row, check_four_in_a_row
+from binary_string_minimax_test import get_bit_mask, check_four_in_a_row
 from connect4_structure_prototype import Grid
 
 class TestBinaryGrid:
@@ -44,11 +44,6 @@ class TestBinaryGrid:
 
     @pytest.mark.parametrize('vertical, horizontal, diagonal1, diagonal2', [], )
     def assert_three_in_a_row(self, vertical, horizontal, diagonal1, diagonal2):
-        assert check_three_in_a_row(vertical) == True
-        assert check_three_in_a_row(horizontal) == True
-        assert check_three_in_a_row(diagonal1) == True
-        assert check_three_in_a_row(diagonal2) == True
-
         assert not check_four_in_a_row(vertical) == True
         assert not check_four_in_a_row(horizontal) == True
         assert not check_four_in_a_row(diagonal1) == True
