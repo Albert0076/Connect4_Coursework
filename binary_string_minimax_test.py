@@ -69,7 +69,7 @@ def check_four_in_a_row(position):
 
 def evaluate_board(position, mask):
     op_position = position ^ mask
-    three_in_a_row = count_three_in_a_row(position) - count_three_in_a_row(op_position)
+    three_in_a_row = check_three_in_a_row(position) - check_three_in_a_row(op_position)
     # Very simple for now
     return three_in_a_row
 
@@ -92,6 +92,26 @@ def count_three_in_a_row(position):
     total += (shift & (shift >> 1)).bit_count()
 
     return total
+
+def check_three_in_a_row(position):
+    shift = position & (position >> 7)
+    if shift & (shift >> 7):
+        return 1
+
+    shift = position & (position >> 6)
+    if shift & (shift >> 6):
+        return 1
+
+    shift = position & (position >> 8)
+    if shift & (shift >> 8):
+        return 1
+
+    shift = position & (position >> 1)
+    if shift & (shift >> 1):
+        return 1
+
+    return 0
+
 
 
 
