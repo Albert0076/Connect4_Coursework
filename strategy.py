@@ -1,31 +1,27 @@
 from connect4_structure_prototype import Grid
 import random
 
+
 class Strategy:
     def __init__(self, grid: Grid, player_symbol: str):
         self.symbol = player_symbol
         self.grid = grid
 
-
     def move(self):
         pass
-
 
 
 class VeryEasy(Strategy):
     def __init__(self, grid: Grid, player_symbol: str):
         super().__init__(grid, player_symbol)
 
-
     def move(self):
         return random.choice([column for column in self.grid.columns if not self.grid.line_full(column)])
-
 
 
 class Easy(Strategy):
     def __init__(self, grid: Grid, player_symbol: str):
         super().__init__(grid, player_symbol)
-
 
     def move(self):
         pass
@@ -61,12 +57,8 @@ class Evaluator:
         self.grid = grid
         self.player_symbol = player_symbol
 
-
         self._position: int = 0
         self._mask: int = 0
-
-
-
 
     def grid_to_int(self):
         """
@@ -79,16 +71,14 @@ class Evaluator:
         for column in range(self.grid.num_columns):
             mask += "0"
             position += "0"
-            for row in range(self.grid.num_rows-1, -1, -1):
+            for row in range(self.grid.num_rows - 1, -1, -1):
                 # We add to the mask if the cell is not empty
                 mask += ['0', '1'][not self.grid.cells[(row, column)].is_empty()]
                 # We add to the position if the cell has the desired symbol
                 position += ['0', '1'][self.grid.cells[(row, column)].symbol == self.player_symbol]
 
-
         # Each column is represented with a binary number with a length of one more than the column height and the msb being 0
         # The grid is then represented with one binary number with the rightmost column being at the end of the number
-
 
         self._position = int(position, 2)
         self._mask = int(mask, 2)
@@ -99,7 +89,6 @@ class Evaluator:
     def get_mask(self):
         return self._mask
 
-
     def check_n_in_a_row(self):
         """
         Checks if the current position contains an n in a row.
@@ -109,11 +98,11 @@ class Evaluator:
             Whether the current position contains an n in a row.
 
         """
-        base_shift = self._position >> self.grid.num_rows+1 # Same as a horizontal shift of 1
+        base_shift = self._position >> self.grid.num_rows + 1  # Same as a horizontal shift of 1
         # This only works with four in a row for now
         # Horizontal
         shift = self._position & base_shift
-        if shift & (shift >> (self.grid.num_rows+1)*2) :
+        if shift & (shift >> (self.grid.num_rows + 1) * 2):
             return True
 
         # Diagonal \
@@ -123,7 +112,7 @@ class Evaluator:
 
         # Diagonal /
         shift = self._position & (base_shift >> 1)
-        if shift & (shift >> (self.grid.num_rows+2) * 2):
+        if shift & (shift >> (self.grid.num_rows + 2) * 2):
             return True
 
         # Vertical
@@ -131,9 +120,7 @@ class Evaluator:
         if shift & (shift >> 2):
             return True
 
-
         return False
-
 
     def make_move(self, column):
         """
@@ -144,13 +131,11 @@ class Evaluator:
             The column where the move is made.
 
         """
-        self._position = self._position ^ self._mask # Changes the position to the other player
-        self._mask = self._mask | (self._mask + (1 << (self.grid.num_columns-1-column) * (self.grid.num_rows+1)))
-
+        self._position = self._position ^ self._mask  # Changes the position to the other player
+        self._mask = self._mask | (self._mask + (1 << (self.grid.num_columns - 1 - column) * (self.grid.num_rows + 1)))
 
     def __repr__(self):
         return Evaluator(grid=self.grid, player_symbol=self.player_symbol)
-
 
     def print_grid(self, mask=True):
         """
@@ -173,14 +158,14 @@ class Evaluator:
         else:
             grid_to_convert = self._position
 
-        mask_str = format(grid_to_convert, f'0{self.grid.num_columns * (self.grid.num_rows+1)}b')
-        output_list = [[" " for __ in range(self.grid.num_columns)] for _ in range(self.grid.num_rows+1)]
+        mask_str = format(grid_to_convert, f'0{self.grid.num_columns * (self.grid.num_rows + 1)}b')
+        output_list = [[" " for __ in range(self.grid.num_columns)] for _ in range(self.grid.num_rows + 1)]
         i, j = self.grid.num_rows, 0
         for symbol in mask_str:
-            i = (i+1) % (self.grid.num_rows+1)
+            i = (i + 1) % (self.grid.num_rows + 1)
             output_list[i][j] = symbol
             if i == self.grid.num_rows:
-                j +=1
+                j += 1
 
         return "".join(["".join(column_list) + "\n" for column_list in output_list])
 
@@ -192,6 +177,3 @@ if __name__ == "__main__":
     evaluator.make_move(1)
     print(evaluator.print_grid())
     print(evaluator.print_grid(False))
-
-
-

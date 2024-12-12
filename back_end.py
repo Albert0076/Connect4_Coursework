@@ -25,14 +25,15 @@ class Game:
 
         self.grid = Grid(num_rows, num_columns, win_num)
 
-        self.symbols: list = ['R', 'B', 'G', 'X'] # The default symbols to use if invalid symbols are given by the Interface
+        self.symbols: list = ['R', 'B', 'G', 'X']  # The default symbols to use if invalid symbols are given by the
+        # Interface
 
-        self.players: list = [] # The players in the game
+        self.players: list = []  # The players in the game
         self.game_over: bool = False
-        self.current_player_num: int = 0 # The index of the player whose turn it is
+        self.current_player_num: int = 0  # The index of the player whose turn it is
         self.current_player = None
         self.turn_num: int = 0
-        self.past_states: dict = {} # A dictionary of past game states with the turn num as the index
+        self.past_states: dict = {}  # A dictionary of past game states with the turn num as the index
 
     def add_human_player(self, name: str, symbol=""):
         """
@@ -62,7 +63,6 @@ class Game:
         """
         self.players.append(ComputerPlayer(self, name, difficulty, symbol))
 
-
     def make_player_move(self):
         """
         Gets a valid move from the player and then makes that move in the grid.
@@ -80,7 +80,6 @@ class Game:
 
             except IndexError as error:
                 self.current_player.register_error(error)
-
 
     def play_game(self):
         """
@@ -105,6 +104,7 @@ class Game:
 
             else:
                 self.current_player_num = (self.current_player_num + 1) % len(self.players)
+                self.current_player = self.players[self.current_player_num]
 
     def add_to_past_dict(self, move_made):
         """
@@ -175,6 +175,14 @@ class ComputerPlayer(Player):
         self.difficulty = difficulty
 
     def get_move(self):
+        """
+        Finds and returns the move based on the computer difficulty.
+        Returns
+        -------
+        int
+            The move the computer has made
+
+        """
         if self.difficulty == 0:
             return self.very_easy()
 
@@ -184,15 +192,21 @@ class ComputerPlayer(Player):
         return 0
 
     def very_easy(self):
+        """
+        Chooses a random column in the grid.
+        Returns
+        -------
+        int
+            The move the computer has made.
+
+        """
         return random.randint(0, self.game.num_columns - 1)
 
     def hard(self):
         # Temporary may eventually have a computer class that returns the ranking of all the moves
-        binary_grid  = get_bit_mask(self.game.grid, self.symbol)
+        binary_grid = get_bit_mask(self.game.grid, self.symbol)
         values = find_best_move(binary_grid[0], binary_grid[1], 10)
         return values.index(max([value for value in values if not value is None]))
-
-
 
     def register_error(self, error):
         pass

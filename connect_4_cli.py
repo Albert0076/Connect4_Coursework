@@ -18,6 +18,10 @@ class CLI:
         self.setup()
 
     def setup(self):
+        """
+        Initialises the game and gets the ruleset.
+
+        """
         print(f'Use default rules? Y/N')
         default_rules = pyinputplus.inputYesNo() == "yes"
         if not default_rules:
@@ -36,6 +40,10 @@ class CLI:
         self.analyse_game()
 
     def add_player(self):
+        """
+        Adds a player to the game.
+
+        """
         print("Add player: ")
         computer_choice = pyinputplus.inputChoice(["Human", "Computer"])
         player_name = pyinputplus.inputStr("Enter player name: ",
@@ -52,6 +60,19 @@ class CLI:
             self.game.add_computer_player(player_name, CLI.difficulty_dictionary[difficulty], player_symbol)
 
     def get_move(self, player: Player):
+        """
+        Gets a move from the user.
+        Parameters
+        ----------
+        player: Player
+            The player who is making the move.
+
+        Returns
+        -------
+        int
+            The move the player has made.
+
+        """
         return pyinputplus.inputInt(f"Player: {player.name}, enter column: ", min=1, max=self.game.num_columns) - 1
 
     def display_win(self, player: Player):
@@ -68,8 +89,8 @@ class CLI:
             grid = self.game.grid
 
         return_str = ""
-        for i in range(len(grid.rows) - 1, -1, -1):
-            for cell in grid.rows[i]:
+        for row in range(len(grid.rows) - 1, -1, -1):
+            for cell in grid.rows[row]:
                 if grid.cells[cell].is_empty():
                     return_str += "|_| "
 
@@ -80,8 +101,7 @@ class CLI:
                             bright = Style.BRIGHT
 
                     symbol = grid.cells[cell].symbol
-                    return_str += "|" + CLI.colours[symbol] + bright + grid.cells[cell].symbol[
-                        0] + Style.RESET_ALL + Fore.RESET + "| "
+                    return_str += "|" + CLI.colours[symbol] + bright + symbol[0] + Style.RESET_ALL + Fore.RESET + "| "
 
             return_str += "\n"
 

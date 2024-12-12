@@ -115,7 +115,8 @@ class Grid:
 
         else:
             for start_index in range(len(line) - self.win_num + 1):
-                # We loop through from the first position in the line, up to the last one where a win could still be possible
+                # We loop through from the first position in the line, up to the last one where a win could still be
+                # possible
                 won = all([self.cells[line[start_index]] == self.cells[line[start_index + relative_index]] for relative_index in range(self.win_num)])
 
                 if won:
