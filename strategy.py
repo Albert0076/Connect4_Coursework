@@ -6,9 +6,16 @@ class Strategy:
     def __init__(self, grid: Grid, player_symbol: str):
         self.symbol = player_symbol
         self.grid = grid
+        self.evaluator = Evaluator(grid, player_symbol, 1)
+        self.probabilities = []
 
     def move(self):
         pass
+
+    def setup_values(self):
+        self.evaluator.grid_to_int()
+        self.evaluator.calculate_move_values()
+        values = self.evaluator.values
 
 
 class VeryEasy(Strategy):
@@ -38,6 +45,7 @@ class Medium(Strategy):
 class Hard(Strategy):
     def __init__(self, grid: Grid, player_symbol: str):
         super().__init__(grid, player_symbol)
+        self.evaluator = Evaluator(grid, player_symbol, 11)
 
     def move(self):
         pass
@@ -88,11 +96,15 @@ class Evaluator:
                 # We add to the position if the cell has the desired symbol
                 position += ['0', '1'][self.grid.cells[(row, column)].symbol == self.player_symbol]
 
-        # Each column is represented with a binary number with a length of one more than the column height and the msb being 0
-        # The grid is then represented with one binary number with the rightmost column being at the end of the number
+        # Each column is represented with a binary number with a length of one more than the column height and the
+        # msb being 0.
+        # The grid is then represented with one binary number with the rightmost column being at the end
+        # of the number.
 
-        self._position = int(position, 2)
-        self._mask = int(mask, 2)
+        if self._position != int(position, 2) or self._mask != int(mask, 2):
+            self._position = int(position, 2)
+            self._mask = int(mask, 2)
+            self.values = []
 
     def get_position(self):
         return self._position
@@ -100,11 +112,13 @@ class Evaluator:
     def get_mask(self):
         return self._mask
 
-    def check_n_in_a_row(self, position: int):
+    def check_n_in_a_row(self, position: int, n=4):
         """
         Checks if the current position contains an n in a row.
         Parameters
         ----------
+        n: int
+            The number in a row we are checking.
         position: int
             The position to check.
 
@@ -115,25 +129,25 @@ class Evaluator:
 
         """
         base_shift = position >> self.num_rows + 1  # Same as a horizontal shift of 1
-        # This only works with four in a row for now
+        # This only works with four/three in a row.
         # Horizontal
         shift = position & base_shift
-        if shift & (shift >> (self.num_rows + 1) * 2):
+        if shift & (shift >> (self.num_rows + 1) * n - 2):
             return True
 
         # Diagonal \
         shift = position & (base_shift << 1)
-        if shift & (shift >> self.num_rows * 2):
+        if shift & (shift >> self.num_rows * n - 2):
             return True
 
         # Diagonal /
         shift = position & (base_shift >> 1)
-        if shift & (shift >> (self.num_rows + 2) * 2):
+        if shift & (shift >> (self.num_rows + 2) * n - 2):
             return True
 
         # Vertical
         shift = position & (position >> 1)
-        if shift & (shift >> 2):
+        if shift & (shift >> n - 2):
             return True
 
         return False
@@ -215,7 +229,15 @@ class Evaluator:
             return 0, 0  # If the grid is full we return 0 since that means it is a draw.
 
         if depth == 0:
-            return 0, 0  # If the depth is 0 we are treating it as a draw but may have more sophisticated method later
+            # Whether current player has n-1 in a row
+            n_minus_1_self = self.check_n_in_a_row(position, self.grid.win_num - 1)
+            # Whether opposing player has n-1 in a row
+            n_minus_1_op = self.check_n_in_a_row(op_position, self.grid.win_num - 1)
+
+            if is_max:
+                return n_minus_1_self * 5 - n_minus_1_op * 5, 0
+
+            return -(n_minus_1_self * 5 - n_minus_1_op * 5), 0
 
         next_states = []
         for column in range(self.num_columns):
@@ -235,9 +257,9 @@ class Evaluator:
             length = minimaxed[1]
 
             if is_max:
-                if val > best:
+                if val > best:  # If we find a new best value we change best and also change the length.
                     best = val
-                    current_length = length
+                    current_length = length  # The minimax algorithm doesn't care about the length, useful for strategy.
                 alpha = max(best, alpha)
                 if beta <= alpha:
                     return alpha, current_length + 1  # We increase the length the end is away by one.
@@ -313,11 +335,12 @@ class Evaluator:
 
 if __name__ == "__main__":
     grid = Grid(6, 7, 4)
+
     for i in range(3):
         grid.add_piece(0, "R")
-
     evaluator = Evaluator(grid, "R", 11)
     evaluator.grid_to_int()
 
     evaluator.calculate_move_values()
+
     print(evaluator.values)
