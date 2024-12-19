@@ -219,7 +219,7 @@ def minimax_alpha_beta_depth(position, mask, is_max, depth, alpha=-np.inf, beta=
 
         else:
             best = min(best, val)
-            beta = min(beta, val)
+            beta = min(beta, best)
             if beta <= alpha:
                 return beta
 
@@ -280,7 +280,7 @@ if __name__ == "__main__":
     test_board_mask = int("0000111001111100001110111111000111101111110000001", 2)
     #print(print_grid(test_board_position))
     #print(print_grid(test_board_mask))
-    #print(minimax_alpha_beta(test_board_position, test_board_mask, True))
+    print(minimax_alpha_beta(test_board_position, test_board_mask, True))
     #print(find_best_move(test_board_position, test_board_mask, 20))
     # Code seems to be working as it correctly identifies red's winning move.
     grid = get_bit_mask(Grid(), "Y")

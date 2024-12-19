@@ -265,5 +265,8 @@ if __name__ == "__main__":
 
         grid.add_piece(i, "Red")
 
+
+
+
     print(grid)
     print(grid.check_win())
