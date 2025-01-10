@@ -1,0 +1,106 @@
+@startuml
+class Grid {
+    int win_num
+    int num_rows
+    int num_columns
+    str winning_symbol
+    
+    {field} dict[(int, int): Cell] cells
+    {field} list[(int, int)] all_lines
+    
+    int column_height(int)
+    void add_piece(int, int)
+    
+    bool check_win()
+    bool check_line(list)
+    
+    bool line_full(line)
+    bool grid_full()
+}
+
+class Cell {
+    int row
+    int column
+    str symbol
+    
+    bool is_empty()
+    void set_symbol(str)
+    bool __eq__(Cell)
+}
+
+class Game {
+    Interface interface
+    Grid grid
+    
+    int num_rows
+    int num_columns
+    
+    list[Player] players
+    bool game_over
+    int current_player_num
+    Player current_player
+    int turn_num
+    dict[int: Grid] past_states
+    
+    void add_human_player(str, str)
+    void add_computer_player(str, int, str)
+    void make_player_move()
+    void play_game()
+    void add_to_past_dict(int)
+}
+
+class CLI {
+}
+
+class GUI {
+}
+
+class Interface{
+    Game game
+    
+    void add_player()
+    int get_move(Player)
+    void display_win(Player)
+    void display_draw()
+    void display_grid(Grid)
+}
+
+class Player{
+    Game game
+    str name
+    str symbol
+    
+    int get_move()
+    void register_error()
+}
+
+
+
+class ComputerPlayer{
+    int difficulty
+    Strategy strategy
+    
+    int get_move()
+}
+
+class Strategy{
+}
+
+class Evaluator{
+}
+
+
+Grid *-- Cell
+Game *-- Grid
+Game *-- Player
+ComputerPlayer *-- Strategy
+Strategy *-- Evaluator
+Interface *-- Game
+
+
+
+Player <|-- ComputerPlayer
+Interface <|-- CLI
+Interface <|-- GUI
+
+@enduml
