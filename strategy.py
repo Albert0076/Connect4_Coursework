@@ -41,7 +41,7 @@ class Strategy:
         self.evaluator.grid_to_int()
         self.evaluator.calculate_move_values()
 
-        max_val =
+        #Need to finish
 
 
 class Evaluator:
