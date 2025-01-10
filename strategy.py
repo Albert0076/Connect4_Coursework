@@ -38,11 +38,13 @@ class Strategy:
         The move the computer has made.
 
         """
-        self.evaluator.grid_to_int()
-        self.evaluator.calculate_move_values()
+        self.rank_moves()
 
-        #Need to finish
+        for move in self.ranked_indices:
+            if random.random < self.select_p:
+                return move
 
+        return move[-1]
 
 class Evaluator:
     MAX = 10
@@ -160,7 +162,7 @@ class Evaluator:
         """
         new_position = position ^ mask  # Changes the position to the other player
         new_mask = mask | (mask + (1 << (self.num_columns - 1 - column) * (self.num_rows + 1)))
-        return new_mask, new_position, position
+        return new_mask, new_position, new_position ^ mask
 
     def check_bit(self, mask: int, column: int, row: int):
         """
@@ -327,8 +329,13 @@ class Evaluator:
 
 
 if __name__ == "__main__":
-    grid = Grid(6, 7, 4)
-
+    grid = Grid()
+    for i in range(3):
+        grid.add_piece(0, "R")
+    evaluator = Evaluator(grid, "R", 5)
+    evaluator.grid_to_int()
+    print(evaluator._position)
+    print(evaluator._mask)
     for i in range(3):
         grid.add_piece(2, "R")
     strategy = Strategy(grid, "R", 11, 1.0)
