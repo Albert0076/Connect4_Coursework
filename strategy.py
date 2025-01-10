@@ -3,52 +3,45 @@ import random
 
 
 class Strategy:
-    def __init__(self, grid: Grid, player_symbol: str):
+    def __init__(self, grid: Grid, player_symbol: str, depth: int, select_p: float):
         self.symbol = player_symbol
         self.grid = grid
-        self.evaluator = Evaluator(grid, player_symbol, 1)
-        self.probabilities = []
+        self.evaluator = Evaluator(grid, player_symbol, depth)
+        self.ranked_indices = []
+        self.select_p: float = select_p  # The probability a given value will be selected
 
-    def move(self):
-        pass
+    def rank_moves(self):
+        """
+        Ranks the possible moves from best to worst
+        Sets the value of self.ranked_indices to the indices ranked from best to worst.
 
-    def setup_values(self):
+        """
         self.evaluator.grid_to_int()
         self.evaluator.calculate_move_values()
-        values = self.evaluator.values
+        # We want moves with higher values to be ranked higher and then rank by depth.
+        values = self.evaluator.move_values
 
+        indexed_values = [(values[i][0], values[i][1], i) for i in range(len(values)) if not values[i] is None]
+        # We shuffle the values to make all indexes equally likely before we start sorting
+        random.shuffle(indexed_values)
 
-class VeryEasy(Strategy):
-    def __init__(self, grid: Grid, player_symbol: str):
-        super().__init__(grid, player_symbol)
-
-    def move(self):
-        return random.choice([column for column in self.grid.columns if not self.grid.line_full(column)])
-
-
-class Easy(Strategy):
-    def __init__(self, grid: Grid, player_symbol: str):
-        super().__init__(grid, player_symbol)
+        # This will sort the moves with value more important than length
+        # Negative sign is because values are ranked in descending
+        ranked_values = sorted(indexed_values, key=lambda element: (-element[0], element[1]))
+        self.ranked_indices = [value[2] for value in ranked_values]
 
     def move(self):
-        pass
+        """
+        Function for determining which move the computer chooses.
+        Returns
+        -------
+        The move the computer has made.
 
+        """
+        self.evaluator.grid_to_int()
+        self.evaluator.calculate_move_values()
 
-class Medium(Strategy):
-    def __init__(self, grid: Grid, player_symbol: str):
-        super().__init__(grid, player_symbol)
-
-    def move(self):
-        pass
-
-
-class Hard(Strategy):
-    def __init__(self, grid: Grid, player_symbol: str):
-        super().__init__(grid, player_symbol)
-        self.evaluator = Evaluator(grid, player_symbol, 11)
-
-    def move(self):
-        pass
+        max_val =
 
 
 class Evaluator:
@@ -77,7 +70,7 @@ class Evaluator:
         self._full_grid = self.calculate_full_grid()
         self._depth = depth
 
-        self.values = []
+        self.move_values = []
 
     def grid_to_int(self):
         """
@@ -104,7 +97,7 @@ class Evaluator:
         if self._position != int(position, 2) or self._mask != int(mask, 2):
             self._position = int(position, 2)
             self._mask = int(mask, 2)
-            self.values = []
+            self.move_values = []
 
     def get_position(self):
         return self._position
@@ -283,17 +276,17 @@ class Evaluator:
             The value of a move at each of the different columns.
 
         """
-        if not self.values:
+        if not self.move_values:
             for column in range(self.num_columns):
                 if self.check_bit(self._mask, column, 0):
-                    self.values.append(None)  # We really don't want anything selecting a column that is too full
+                    self.move_values.append(None)  # We really don't want anything selecting a column that is too full
 
                 else:
                     move = self.make_move(self._mask, self._position, column)
-                    self.values.append(self.minimax_alpha_beta(move[0], move[1], 0, False, self._depth,
-                                                               -Evaluator.MAX, Evaluator.MAX))
+                    self.move_values.append(self.minimax_alpha_beta(move[0], move[1], 0, False, self._depth,
+                                                                    -Evaluator.MAX, Evaluator.MAX))
 
-        return self.values
+        return self.move_values
 
     def calculate_full_grid(self):
         grid_list = [["0"] + ["1" for i in range(self.num_rows)] for j in range(self.num_columns)]
@@ -337,10 +330,7 @@ if __name__ == "__main__":
     grid = Grid(6, 7, 4)
 
     for i in range(3):
-        grid.add_piece(0, "R")
-    evaluator = Evaluator(grid, "R", 11)
-    evaluator.grid_to_int()
-
-    evaluator.calculate_move_values()
-
-    print(evaluator.values)
+        grid.add_piece(2, "R")
+    strategy = Strategy(grid, "R", 11, 1.0)
+    strategy.rank_moves()
+    print(strategy.ranked_indices)

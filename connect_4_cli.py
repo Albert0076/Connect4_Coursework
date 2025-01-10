@@ -7,7 +7,8 @@ class CLI:
     difficulty_dictionary = {"Very Easy": 0,
                              "Easy": 1,
                              "Medium": 2,
-                             "Hard": 3, }
+                             "Hard": 3,
+                             "Perfect": 4}
 
     colours = {"R": Fore.RED, "B": Fore.BLUE, "G": Fore.GREEN, "Y": Fore.YELLOW, }
 

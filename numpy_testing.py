@@ -13,7 +13,7 @@ pos_weights = [0, 1, 2, 3, 3, 2, 1, 0]
 
 def convert_to_np(grid: Grid):
     np_grid = np.zeros((grid.num_columns, grid.num_rows))
-    for cell in grid.cells.values():
+    for cell in grid.cells.move_values():
         if not cell.is_empty():
             if cell.symbol == "r":
                 np_grid[cell.column, cell.row] = 1

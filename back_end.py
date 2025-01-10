@@ -2,6 +2,7 @@ from connect4_structure_prototype import Grid
 import copy
 import random
 from binary_string_minimax_test import find_best_move, get_bit_mask
+from strategy import Strategy, Evaluator
 
 
 class Game:
@@ -170,9 +171,18 @@ class Player:
 
 
 class ComputerPlayer(Player):
+    # The values to pass into strategy depending on the difficulty.
+    difficulty_dict = {0: (0, 0.0),
+                       1: (4, 1.0),
+                       2: (7, 1,0),
+                       3: (10, 1.0),
+                       4: (10, 1.0)}
+
     def __init__(self, game: Game, name: str, difficulty: int, symbol=""):
         super().__init__(game, name, symbol)
         self.difficulty = difficulty
+        difficulty_tuple = ComputerPlayer.difficulty_dict[difficulty]
+        self.strategy = Strategy(game.grid, self.symbol, difficulty_tuple[0], difficulty_tuple[1])
 
     def get_move(self):
         """
@@ -183,30 +193,7 @@ class ComputerPlayer(Player):
             The move the computer has made
 
         """
-        if self.difficulty == 0:
-            return self.very_easy()
-
-        if self.difficulty == 3:
-            return self.hard()
-
-        return 0
-
-    def very_easy(self):
-        """
-        Chooses a random column in the grid.
-        Returns
-        -------
-        int
-            The move the computer has made.
-
-        """
-        return random.randint(0, self.game.num_columns - 1)
-
-    def hard(self):
-        # Temporary may eventually have a computer class that returns the ranking of all the moves
-        binary_grid = get_bit_mask(self.game.grid, self.symbol)
-        values = find_best_move(binary_grid[0], binary_grid[1], 10)
-        return values.index(max([value for value in values if not value is None]))
+        return self.strategy.move()
 
     def register_error(self, error):
-        pass
+        raise IndexError("Computer has made an invalid move.")
