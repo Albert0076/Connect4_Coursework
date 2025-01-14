@@ -155,6 +155,9 @@ class Grid:
         """
         return all([self.line_full(line) for line in self.all_lines])
 
+    def set_cell(self, row, column, symbol):
+        self.cells[(row, column)].set_symbol(symbol)
+
     def __repr__(self):
         """
         __repr__ function for grid.

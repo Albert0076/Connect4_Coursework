@@ -17,9 +17,8 @@ class Strategy:
 
         """
         self.evaluator.grid_to_int()
-        self.evaluator.calculate_move_values()
+        values = self.evaluator.calculate_move_values()
         # We want moves with higher values to be ranked higher and then rank by depth.
-        values = self.evaluator.move_values
 
         indexed_values = [(values[i][0], values[i][1], i) for i in range(len(values)) if not values[i] is None]
         # We shuffle the values to make all indexes equally likely before we start sorting
@@ -27,6 +26,7 @@ class Strategy:
 
         # This will sort the moves with value more important than length
         # Negative sign is because values are ranked in descending
+
         ranked_values = sorted(indexed_values, key=lambda element: (-element[0], element[1]))
         self.ranked_indices = [value[2] for value in ranked_values]
 
@@ -41,10 +41,10 @@ class Strategy:
         self.rank_moves()
 
         for move in self.ranked_indices:
-            if random.random < self.select_p:
+            if random.random() < self.select_p:
                 return move
 
-        return move[-1]
+        return random.choice(self.ranked_indices)
 
 class Evaluator:
     MAX = 10
@@ -295,6 +295,9 @@ class Evaluator:
         grid_str = "".join("".join(row) for row in grid_list)
         return int(grid_str, 2)
 
+
+
+
     def __repr__(self):
         return f"Evaluator({self.grid=}, {self.player_symbol=})"
 
@@ -312,6 +315,11 @@ class Evaluator:
             The formatted grid.
 
         """
+        output_list = self.grid_list(grid_int)
+
+        return "".join(["".join(column_list) + "\n" for column_list in output_list])
+
+    def grid_list(self, grid_int: int):
         # We are seeing if we want to return the mask or the position
         grid_to_convert = grid_int
         # Get a binary string of the length we want so we can easily print it:
@@ -325,19 +333,40 @@ class Evaluator:
             if row == self.grid.num_rows:
                 column += 1
 
-        return "".join(["".join(column_list) + "\n" for column_list in output_list])
+        return output_list
+
+    def get_grid(self, op_symbol):
+        player_output_list = self.grid_list(self._position)
+        op_output_list = self.grid_list(self._mask ^ self._position)
+        new_grid = Grid(self.num_rows, self.num_columns, self.grid.win_num)
+
+        for i in range(len(player_output_list)):
+            for j in range(len(player_output_list)):
+                if i != 0:
+                    if player_output_list[i][j] == "1":
+                        new_grid.set_cell(self.num_rows-i, j, self.player_symbol)
+
+                    elif op_output_list[i][j] == "1":
+                        new_grid.set_cell(self.num_rows-i, j, op_symbol)
+
+        return new_grid
+
+
 
 
 if __name__ == "__main__":
     grid = Grid()
     for i in range(3):
         grid.add_piece(0, "R")
-    evaluator = Evaluator(grid, "R", 5)
+    evaluator = Evaluator(grid, "R", 20)
     evaluator.grid_to_int()
-    print(evaluator._position)
-    print(evaluator._mask)
-    for i in range(3):
-        grid.add_piece(2, "R")
-    strategy = Strategy(grid, "R", 11, 1.0)
+
+    evaluator._mask = int("0000111001111100001110111111000111101111110000001", 2)
+    evaluator._position = int("0000010000101000000110010101000011000110100000001", 2)
+    grid = evaluator.get_grid("B")
+
+    strategy = Strategy(grid, "R", 20, 1.0)
     strategy.rank_moves()
+    print(strategy.evaluator.calculate_move_values())
     print(strategy.ranked_indices)
+    print(strategy.move())
