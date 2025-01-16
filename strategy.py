@@ -1,4 +1,5 @@
 from connect4_structure_prototype import Grid
+import math
 import random
 
 
@@ -47,8 +48,6 @@ class Strategy:
         return random.choice(self.ranked_indices)
 
 class Evaluator:
-    MAX = 10
-
     def __init__(self, grid: Grid, player_symbol: str, depth: int):
         """
         Parameters
@@ -126,24 +125,43 @@ class Evaluator:
         base_shift = position >> self.num_rows + 1  # Same as a horizontal shift of 1
         # This only works with four/three in a row.
         # Horizontal
-        shift = position & base_shift
-        if shift & (shift >> (self.num_rows + 1) * n - 2):
-            return True
+        if n == 4:
 
-        # Diagonal \
-        shift = position & (base_shift << 1)
-        if shift & (shift >> self.num_rows * n - 2):
-            return True
+            shift = position & base_shift
+            if shift & (shift >> (self.num_rows * 2 + 2)):
+                return True
 
-        # Diagonal /
-        shift = position & (base_shift >> 1)
-        if shift & (shift >> (self.num_rows + 2) * n - 2):
-            return True
+            # Diagonal \
+            shift = position & (base_shift << 1)
+            if shift & (shift >> (self.num_rows * 2)):
+                return True
 
-        # Vertical
-        shift = position & (position >> 1)
-        if shift & (shift >> n - 2):
-            return True
+            # Diagonal /
+            shift = position & (base_shift >> 1)
+            if shift & (shift >> ((self.num_rows * 2)+4)):
+                return True
+
+            # Vertical
+            shift = position & (position >> 1)
+            if shift & (shift >> 2):
+                return True
+
+        if n == 3:
+            shift = position & base_shift
+            if shift & (shift >> (self.num_rows + 1)):
+                return True
+
+            shift = position & (base_shift << 1)
+            if shift & (shift >> self.num_rows):
+                return True
+
+            shift = position & (base_shift >> 1)
+            if shift & (shift >> (self.num_rows + 2)):
+                return True
+
+            shift = position & (position >> 1)
+            if shift & (shift >> 1):
+                return True
 
         return False
 
@@ -187,8 +205,8 @@ class Evaluator:
         # Checking whether the top row of a column has a bit by doing an and with a bit in that column
         return bool(mask & (1 << (shift * (self.num_columns - column) - (row + 2))))
 
-    def minimax_alpha_beta(self, mask: int, position: int, op_position: int, is_max: bool, depth: int, alpha: int,
-                           beta: int):
+    def minimax_alpha_beta(self, mask: int, position: int, is_max: bool, depth: int, alpha:float,
+                           beta:float):
         """
         Recursively checks the possible board from the current states and evaluates them.
         Parameters
@@ -197,15 +215,12 @@ class Evaluator:
             The mask of the grid.
         position: int
             The position of the grid.
-
-        op_position: int
-            The position of the opponent grid.
         is_max: int
             Whether it is maximising or minimising.
         depth: int
             The depth to check up to.
-        alpha: int
-        beta: int
+        alpha: float
+        beta: float
 
         Returns
         -------
@@ -213,26 +228,25 @@ class Evaluator:
             The value of the board and how far away it terminates.
 
         """
-        if self.check_n_in_a_row(op_position):  # Since we are receiving after the opposing player has made a move we
+        if self.check_n_in_a_row(position ^ mask):  # Since we are receiving after the opposing player has made a move we
             # can guarantee that wew don't have a 4-in-a-row
             if is_max:
-                return -Evaluator.MAX, 0
+                return -math.inf, 0
 
-            return Evaluator.MAX, 0
+            return math.inf, 0
 
         if mask == self._full_grid:
             return 0, 0  # If the grid is full we return 0 since that means it is a draw.
 
         if depth == 0:
-            # Whether current player has n-1 in a row
-            n_minus_1_self = self.check_n_in_a_row(position, self.grid.win_num - 1)
-            # Whether opposing player has n-1 in a row
-            n_minus_1_op = self.check_n_in_a_row(op_position, self.grid.win_num - 1)
+            self_count = self.check_n_in_a_row(position, 3)
+            op_count = self.check_n_in_a_row(position ^ mask, 3)
 
             if is_max:
-                return n_minus_1_self * 5 - n_minus_1_op * 5, 0
+                return 5 * (self_count - op_count), 0
 
-            return -(n_minus_1_self * 5 - n_minus_1_op * 5), 0
+            return 5 * (op_count - self_count), 0
+
 
         next_states = []
         for column in range(self.num_columns):
@@ -241,15 +255,15 @@ class Evaluator:
                 next_states.append(self.make_move(mask, position, column))
 
         if is_max:
-            best = -Evaluator.MAX
+            best = -math.inf
         else:
-            best = Evaluator.MAX
+            best = math.inf
 
         current_length = 0
         for state in next_states:
-            minimaxed = self.minimax_alpha_beta(state[0], state[1], state[2], not is_max, depth - 1, alpha, beta)
-            val = minimaxed[0]
-            length = minimaxed[1]
+            val_length = self.minimax_alpha_beta(state[0], state[1], not is_max, depth - 1, alpha, beta)
+            val = val_length[0]
+            length = val_length[1]
 
             if is_max:
                 if val > best:  # If we find a new best value we change best and also change the length.
@@ -285,8 +299,8 @@ class Evaluator:
 
                 else:
                     move = self.make_move(self._mask, self._position, column)
-                    self.move_values.append(self.minimax_alpha_beta(move[0], move[1], 0, False, self._depth,
-                                                                    -Evaluator.MAX, Evaluator.MAX))
+                    self.move_values.append(self.minimax_alpha_beta(move[0], move[1], False, self._depth,
+                                                                    -math.inf, math.inf))
 
         return self.move_values
 
@@ -356,17 +370,26 @@ class Evaluator:
 
 if __name__ == "__main__":
     grid = Grid()
-    for i in range(3):
-        grid.add_piece(0, "R")
-    evaluator = Evaluator(grid, "R", 20)
+    grid.add_piece(0, "B")
+    grid.add_piece(0, "R")
+    grid.add_piece(1, "R")
+    grid.add_piece(1, "R")
+    grid.add_piece(1, "B")
+    grid.add_piece(1, "R")
+    grid.add_piece(1, "R")
+    grid.add_piece(1, "B")
+    grid.add_piece(4, "B")
+    grid.add_piece(5, "B")
+    grid.add_piece(5, "R")
+    grid.add_piece(6, "B")
+    grid.add_piece(6, "R")
+    grid.add_piece(6, "R")
+    grid.add_piece(6, "B")
+    grid.add_piece(6, "B")
+
+
+    evaluator = Evaluator(grid, "R", 10)
     evaluator.grid_to_int()
+    evaluator.calculate_move_values()
+    print(evaluator.move_values)
 
-    evaluator._mask = int("0000111001111100001110111111000111101111110000001", 2)
-    evaluator._position = int("0000010000101000000110010101000011000110100000001", 2)
-    grid = evaluator.get_grid("B")
-
-    strategy = Strategy(grid, "R", 20, 1.0)
-    strategy.rank_moves()
-    print(strategy.evaluator.calculate_move_values())
-    print(strategy.ranked_indices)
-    print(strategy.move())

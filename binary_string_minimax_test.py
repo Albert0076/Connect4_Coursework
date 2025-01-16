@@ -269,22 +269,30 @@ def generate_random_grid(n):
 
 
 if __name__ == "__main__":
-    grid_0 = Grid()
-    for i in range(4):
-        grid_0.add_piece(0, "Y")
+    grid = Grid()
 
-    grid_0 = get_bit_mask(grid_0, "Y")
+    grid.add_piece(0, "B")
+    grid.add_piece(0, "R")
+    grid.add_piece(1, "R")
+    grid.add_piece(1, "R")
+    grid.add_piece(1, "B")
+    grid.add_piece(1, "R")
+    grid.add_piece(1, "R")
+    grid.add_piece(1, "B")
+    grid.add_piece(4, "B")
+    grid.add_piece(5, "B")
+    grid.add_piece(5, "R")
+    grid.add_piece(6, "B")
+    grid.add_piece(6, "R")
+    grid.add_piece(6, "R")
+    grid.add_piece(6, "B")
+    grid.add_piece(6, "B")
 
-    # Starting player wins, optimal move is 4
-    test_board_position = int("0000010000101000000110010101000011000110100000001", 2)
-    test_board_mask = int("0000111001111100001110111111000111101111110000001", 2)
-    #print(print_grid(test_board_position))
-    #print(print_grid(test_board_mask))
-    print(minimax_alpha_beta(test_board_position, test_board_mask, True))
-    #print(find_best_move(test_board_position, test_board_mask, 20))
-    # Code seems to be working as it correctly identifies red's winning move.
-    grid = get_bit_mask(Grid(), "Y")
-    print(find_best_move(grid[0], grid[1], 10))
+
+    grids = get_bit_mask(grid, "R")
+    pos = grids[0]
+    mask = grids[1]
+    print(find_best_move(pos, mask, 10))
 
 
 
