@@ -173,10 +173,10 @@ class Player:
 class ComputerPlayer(Player):
     # The values to pass into strategy depending on the difficulty.
     difficulty_dict = {0: (0, 0.0),
-                       1: (4, 1.0),
-                       2: (7, 1,0),
-                       3: (10, 1.0),
-                       4: (10, 1.0)}
+                       1: (4, 0.5),
+                       2: (7, 0.6),
+                       3: (10, 0.8),
+                       4: (11, 1.0)}
 
     def __init__(self, game: Game, name: str, difficulty: int, symbol=""):
         super().__init__(game, name, symbol)

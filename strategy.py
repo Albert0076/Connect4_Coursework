@@ -1,4 +1,5 @@
 from connect4_structure_prototype import Grid
+from collections import defaultdict
 import math
 import random
 
@@ -70,6 +71,8 @@ class Evaluator:
         self._mask: int = 0
         self._full_grid = self.calculate_full_grid()
         self._depth = depth
+
+        self.cache = defaultdict(lambda: (None, None))
 
         self.move_values = []
 
@@ -261,9 +264,19 @@ class Evaluator:
 
         current_length = 0
         for state in next_states:
-            val_length = self.minimax_alpha_beta(state[0], state[1], not is_max, depth - 1, alpha, beta)
-            val = val_length[0]
-            length = val_length[1]
+            cached_value = self.get_cache(state[0], state[1], depth-1)
+            if cached_value is False:
+                val_length = self.minimax_alpha_beta(state[0], state[1], not is_max, depth - 1, alpha, beta)
+                val = val_length[0]
+                length = val_length[1]
+
+                self.set_cache(state[0], state[1], (-1) ** (not is_max) *cached_value, length)
+
+            else:
+                val = cached_value[0]
+                length = cached_value[1]
+
+
 
             if is_max:
                 if val > best:  # If we find a new best value we change best and also change the length.
@@ -308,6 +321,22 @@ class Evaluator:
         grid_list = [["0"] + ["1" for i in range(self.num_rows)] for j in range(self.num_columns)]
         grid_str = "".join("".join(row) for row in grid_list)
         return int(grid_str, 2)
+
+
+    def get_cache(self, mask, pos, depth):
+        cached_value = self.cache[(mask, pos)]
+        if self.cache[(mask, pos)][0] is None:
+            return False
+
+        elif cached_value[1] < depth:
+            return False
+
+        return cached_value
+
+
+
+    def set_cache(self, mask, pos, value, depth):
+        self.cache[(mask, pos)] = (value, depth)
 
 
 
