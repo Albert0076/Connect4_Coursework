@@ -176,7 +176,7 @@ class ComputerPlayer(Player):
                        1: (4, 0.5),
                        2: (7, 0.6),
                        3: (10, 0.8),
-                       4: (11, 1.0)}
+                       4: (12, 1.0)}
 
     def __init__(self, game: Game, name: str, difficulty: int, symbol=""):
         super().__init__(game, name, symbol)
