@@ -242,8 +242,8 @@ class Evaluator:
             return 0, 0  # If the grid is full we return 0 since that means it is a draw.
 
         if depth == 0:
-            evaluated = self.count_bits(position, position ^ mask)
-            return (-1 ** (not is_max)) * evaluated * 8 // 128, 0
+            return ((-1) ** (not is_max)) * (self.evaluate_grid(position) - self.evaluate_grid(position ^ mask)), 0
+
         next_states = []
         for column in range(self.num_columns):
             # Find all possible states that aren't full. May be more efficient to do this part in 1 loop with the rest.
@@ -332,32 +332,11 @@ class Evaluator:
         self.cache[(mask, pos)] = (value, depth)
 
 
-    def count_bits(self, pos, op_pos):
+    def evaluate_grid(self, position):
+        int_string = format(position, f'0{self.grid.num_columns * (self.grid.num_rows + 1)}b')
+        columns = [int(int_string[(self.num_rows + 1) * i: (self.num_rows + 1) * (i + 1)]) for i in range(self.num_columns)]
+        return sum([num.bit_count() for num in columns])
 
-         self_bits = format(pos, f'0{self.grid.num_columns * (self.grid.num_rows + 1)}b')
-         op_bits = format(op_pos, f'0{self.grid.num_columns * (self.grid.num_rows + 1)}b')
-         # Look at the middle column and the ones around it
-         # Middle (self.grid.num_columns + 1)/2 - two different if even
-         # Next to middle (middle +- 1)
-         if self.grid.num_columns % 2:
-             middle = [(self.grid.num_columns + 1) // 2]
-             sides = [middle[0]-1, middle[0]+1]
-
-
-         else:
-             middle = [self.grid.num_columns // 2, (self.grid.num_columns + 2) // 2]
-             sides = [middle[0]-1, middle[1]+1]
-
-         self_val = self.count_middle_bits(self_bits, middle, sides)
-         op_val = self.count_middle_bits(op_bits, middle, sides)
-
-         return self_val - op_val
-
-
-
-    def count_middle_bits(self, self_bits, middle, sides):
-        return (2 * sum([int(self_bits[(self.num_rows + 1) * index:(self.num_rows + 1) * (index+1)], 2) for index in middle])
-                + sum([int(self_bits[(self.num_rows + 1) * index:(self.num_rows + 1) * (index+1)], 2) for index in sides]))
 
 
     def __repr__(self):
@@ -440,4 +419,3 @@ if __name__ == "__main__":
     evaluator.grid_to_int()
     evaluator.calculate_move_values()
     print(evaluator.move_values)
-

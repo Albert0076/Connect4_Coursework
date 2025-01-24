@@ -16,7 +16,6 @@ class CLI:
         self.game = None
         self.symbols = [key for key in CLI.colours.keys()]
 
-        self.setup()
 
     def setup(self):
         """
@@ -39,6 +38,34 @@ class CLI:
 
         self.game.play_game()
         self.analyse_game()
+
+    def comp_v_comp(self):
+        self.game = Game(self)
+        self.game.add_computer_player("Hal 9000", 4, "R")
+        self.game.add_computer_player("C3PO", 4, "B")
+
+        self.game.play_game()
+        self.analyse_game()
+
+    def comp_v_human(self):
+        self.game = Game(self)
+        self.game.add_human_player("Raiden", "R")
+        self.game.add_computer_player("Arsenal Gear", 4, "B")
+
+        self.game.play_game()
+        self.analyse_game()
+
+
+
+    def human_v_human(self):
+        self.game = Game(self)
+        self.game.add_human_player("Harry", "R")
+        self.game.add_human_player("Kim", "B")
+
+
+        self.game.play_game()
+        self.analyse_game()
+
 
     def add_player(self):
         """
@@ -74,7 +101,13 @@ class CLI:
             The move the player has made.
 
         """
+        print(f"Turn {self.game.turn_num + 1}")
         return pyinputplus.inputInt(f"Player: {player.name}, enter column: ", min=1, max=self.game.num_columns) - 1
+
+
+    def computer_thinking(self, player: Player):
+        print(f"Turn {self.game.turn_num + 1}")
+        print(f"Computer Player {player.name} is thinking.")
 
     def display_win(self, player: Player):
         print(f"Player: {player.name} has won the game!")
@@ -111,12 +144,24 @@ class CLI:
 
         print(return_str)
 
+    def display_move(self, move):
+        print(f"{self.game.current_player.name} made the move: {move + 1}.")
+
     def analyse_game(self):
         player_choice = pyinputplus.inputYesNo("Do you want to analyse game. Y/N") == "yes"
         while player_choice:
             turn_choice = pyinputplus.inputInt("What turn do you want to look at: ", min=1, max=self.game.turn_num)
             turn = self.game.past_states[turn_choice - 1]
             self.display_grid(grid=turn[0], highlighted_moves=[(turn[2], turn[1])])
+
+            evaluate_choice = pyinputplus.inputYesNo("Do you want to evaluate the move. Y/N") == "yes"
+            if evaluate_choice:
+                move_values = self.game.evaluate_move(turn_choice - 1)
+                for i in range(len(move_values)):
+                    print(f"Move {i + 1}: {move_values[i]}")
+
+
+
             player_choice = pyinputplus.inputYesNo("Do you want to analyse a different turn. Y/N") == "yes"
 
     @staticmethod
@@ -126,3 +171,4 @@ class CLI:
 
 if __name__ == "__main__":
     cli = CLI()
+    cli.human_v_human()
