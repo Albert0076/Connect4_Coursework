@@ -29,7 +29,10 @@ class Strategy:
         # This will sort the moves with value more important than length
         # Negative sign is because values are ranked in descending
 
-        ranked_values = sorted(indexed_values, key=lambda element: (-element[0], element[1]))
+        # If the move is positively ranked we want to choose the move with the lowest length.
+        # If it is negatively ranked we want to choose the move with the highest length.
+        # Moves with zero value should theoretically all have the same length so it shouldn't matter.
+        ranked_values = sorted(indexed_values, key=lambda element: (-element[0], (-1 if element[0] < 0 else 1) * element[1]))
         self.ranked_indices = [value[2] for value in ranked_values]
 
     def move(self):

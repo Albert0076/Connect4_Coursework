@@ -142,7 +142,7 @@ class Grid:
             Whether the line is full.
 
         """
-        return all([self.cells[position].is_empty() for position in line])
+        return all([not self.cells[position].is_empty() for position in line])
 
     def grid_full(self):
         """

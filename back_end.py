@@ -131,7 +131,7 @@ class Game:
 
     def evaluate_move(self, turn: int):
         # This will look at the dictionary of moves and evaluate the move made on a scale of -10 to 10
-        evaluator = Evaluator(self.past_states[turn][0], self.players[(turn-1) % len(self.players)], 11)
+        evaluator = Evaluator(self.past_states[turn][0], self.players[turn % len(self.players)].symbol, 11)
         evaluator.grid_to_int()
         evaluator.calculate_move_values()
         return [element[0] for element in evaluator.move_values]

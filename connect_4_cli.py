@@ -101,12 +101,12 @@ class CLI:
             The move the player has made.
 
         """
-        print(f"Turn {self.game.turn_num + 1}")
+        print(f"Turn {self.game.turn_num}")
         return pyinputplus.inputInt(f"Player: {player.name}, enter column: ", min=1, max=self.game.num_columns) - 1
 
 
     def computer_thinking(self, player: Player):
-        print(f"Turn {self.game.turn_num + 1}")
+        print(f"Turn {self.game.turn_num}")
         print(f"Computer Player {player.name} is thinking.")
 
     def display_win(self, player: Player):
@@ -156,9 +156,14 @@ class CLI:
 
             evaluate_choice = pyinputplus.inputYesNo("Do you want to evaluate the move. Y/N") == "yes"
             if evaluate_choice:
+                # This functions tells us what symbol to use base on the given value
+                # 10: "++", 0 -> 10: "+" , 0: "=", -9 -> -1 : "-", -10: "--"
+                evaluate_symbol = lambda x: "=" if x == 0 else (
+                    ("++" if x == 10 else "+") if x > 0 else ("--" if x == -10 else "-"))
+
                 move_values = self.game.evaluate_move(turn_choice - 1)
                 for i in range(len(move_values)):
-                    print(f"Move {i + 1}: {move_values[i]}")
+                    print(f"Move {i + 1}: {evaluate_symbol(move_values[i])}")
 
 
 
@@ -171,4 +176,4 @@ class CLI:
 
 if __name__ == "__main__":
     cli = CLI()
-    cli.human_v_human()
+    cli.comp_v_comp()
