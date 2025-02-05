@@ -184,9 +184,9 @@ class Player:
 class ComputerPlayer(Player):
     # The values to pass into strategy depending on the difficulty.
     difficulty_dict = {0: (0, 0.0),
-                       1: (3, 0.5),
-                       2: (6, 0.6),
-                       3: (9, 0.8),
+                       1: (3, 0.7),
+                       2: (6, 0.8),
+                       3: (9, 0.95),
                        4: (11, 1.0)}
 
     def __init__(self, game: Game, name: str, difficulty: int, symbol=""):

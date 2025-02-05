@@ -32,7 +32,8 @@ class Strategy:
         # If the move is positively ranked we want to choose the move with the lowest length.
         # If it is negatively ranked we want to choose the move with the highest length.
         # Moves with zero value should theoretically all have the same length so it shouldn't matter.
-        ranked_values = sorted(indexed_values, key=lambda element: (-element[0], (-1 if element[0] < 0 else 1) * element[1]))
+        ranked_values = sorted(indexed_values,
+                               key=lambda element: (-element[0], (-1 if element[0] < 0 else 1) * element[1]))
         self.ranked_indices = [value[2] for value in ranked_values]
 
     def move(self):
@@ -50,6 +51,7 @@ class Strategy:
                 return move
 
         return random.choice(self.ranked_indices)
+
 
 class Evaluator:
     def __init__(self, grid: Grid, player_symbol: str, depth: int):
@@ -107,9 +109,25 @@ class Evaluator:
             self.move_values = []
 
     def get_position(self):
+        """
+        Gets the position stored in the evaluator.
+        Returns
+        -------
+        int:
+            the position
+
+        """
         return self._position
 
     def get_mask(self):
+        """
+        Gets the mask stored in the evaluator
+        Returns
+        -------
+        int:
+            the mask
+
+        """
         return self._mask
 
     def check_n_in_a_row(self, position: int, n=4):
@@ -144,7 +162,7 @@ class Evaluator:
 
             # Diagonal /
             shift = position & (base_shift >> 1)
-            if shift & (shift >> ((self.num_rows * 2)+4)):
+            if shift & (shift >> ((self.num_rows * 2) + 4)):
                 return True
 
             # Vertical
@@ -211,8 +229,8 @@ class Evaluator:
         # Checking whether the top row of a column has a bit by doing an and with a bit in that column
         return bool(mask & (1 << (shift * (self.num_columns - column) - (row + 2))))
 
-    def minimax_alpha_beta(self, mask: int, position: int, is_max: bool, depth: int, alpha:float,
-                           beta:float):
+    def minimax_alpha_beta(self, mask: int, position: int, is_max: bool, depth: int, alpha: float,
+                           beta: float):
         """
         Recursively checks the possible board from the current states and evaluates them.
         Parameters
@@ -234,8 +252,8 @@ class Evaluator:
             The value of the board and how far away it terminates.
 
         """
-        if self.check_n_in_a_row(position ^ mask):  # Since we are receiving after the opposing player has made a move we
-            # can guarantee that wew don't have a 4-in-a-row
+        if self.check_n_in_a_row(position ^ mask):  # Since we are receiving after the opposing player has made a
+            # move we can guarantee that wew don't have a 4-in-a-row
             if is_max:
                 return -math.inf, 0
 
@@ -260,19 +278,17 @@ class Evaluator:
 
         current_length = 0
         for state in next_states:
-            cached_value = self.get_cache(state[0], state[1], depth-1)
+            cached_value = self.get_cache(state[0], state[1], depth - 1)
             if cached_value is False:
                 val_length = self.minimax_alpha_beta(state[0], state[1], not is_max, depth - 1, alpha, beta)
                 val = val_length[0]
                 length = val_length[1]
 
-                self.set_cache(state[0], state[1], (-1) ** (not is_max) *cached_value, length)
+                self.set_cache(state[0], state[1], (-1) ** (not is_max) * cached_value, length)
 
             else:
                 val = cached_value[0]
                 length = cached_value[1]
-
-
 
             if is_max:
                 if val > best:  # If we find a new best value we change best and also change the length.
@@ -314,33 +330,81 @@ class Evaluator:
         return self.move_values
 
     def calculate_full_grid(self):
+        """
+        Calculates the integer value of a full grid.
+        Returns
+        -------
+        int
+            The integer value of the full grid
+
+        """
         grid_list = [["0"] + ["1" for i in range(self.num_rows)] for j in range(self.num_columns)]
         grid_str = "".join("".join(row) for row in grid_list)
         return int(grid_str, 2)
 
-
     def get_cache(self, mask, pos, depth):
+        """
+        Returns the cached value for the mask and position if one exists and returns False if it doesn't
+        Parameters
+        ----------
+        mask: int
+            the mask of the grid
+        pos: int
+            the pos of the grid
+        depth: int
+            the depth of the current search
+
+        Returns
+        -------
+        int
+            The cached value stored
+
+        """
         cached_value = self.cache[(mask, pos)]
         if self.cache[(mask, pos)][0] is None:
-            return False
+            return False  # If it does not exist then return False
 
         elif cached_value[1] < depth:
-            return False
+            return False  # If the stored depth is less than the desired then we should do the search again
 
         return cached_value
 
+    def set_cache(self, mask: int, pos: int, value: int, depth: int):
+        """
+        Sets the value of the cache based off the mask and position
+        Parameters
+        ----------
+        mask: int
+            the mask of the grid
+        pos: int
+            the pos of the grid
+        value: int
+            the calculated value for the grid
+        depth: int
+            the depth of the search
 
-
-    def set_cache(self, mask, pos, value, depth):
+        """
         self.cache[(mask, pos)] = (value, depth)
 
-
     def evaluate_grid(self, position):
+        """
+        Evaluates a grid based on how close to the middle the bits are
+        Parameters
+        ----------
+        position: int
+            The position of the grid to evaluate.
+
+        Returns
+        -------
+        int:
+            the estimate for the value of the grid
+
+        """
         int_string = format(position, f'0{self.grid.num_columns * (self.grid.num_rows + 1)}b')
-        columns = [int(int_string[(self.num_rows + 1) * i: (self.num_rows + 1) * (i + 1)]) for i in range(self.num_columns)]
+        # I need to come back to this/comment it because I forgot what this does. It seems to work though.
+        columns = [int(int_string[(self.num_rows + 1) * i: (self.num_rows + 1) * (i + 1)]) for i in
+                   range(self.num_columns)]
         return sum([num.bit_count() for num in columns])
-
-
 
     def __repr__(self):
         return f"Evaluator({self.grid=}, {self.player_symbol=})"
@@ -388,14 +452,12 @@ class Evaluator:
             for j in range(len(player_output_list)):
                 if i != 0:
                     if player_output_list[i][j] == "1":
-                        new_grid.set_cell(self.num_rows-i, j, self.player_symbol)
+                        new_grid.set_cell(self.num_rows - i, j, self.player_symbol)
 
                     elif op_output_list[i][j] == "1":
-                        new_grid.set_cell(self.num_rows-i, j, op_symbol)
+                        new_grid.set_cell(self.num_rows - i, j, op_symbol)
 
         return new_grid
-
-
 
 
 if __name__ == "__main__":
@@ -416,7 +478,6 @@ if __name__ == "__main__":
     grid.add_piece(6, "R")
     grid.add_piece(6, "B")
     grid.add_piece(6, "B")
-
 
     evaluator = Evaluator(grid, "R", 12)
     evaluator.grid_to_int()
