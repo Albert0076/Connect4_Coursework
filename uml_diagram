@@ -4,16 +4,16 @@ class Grid {
     int num_rows
     int num_columns
     str winning_symbol
-    
+
     {field} dict[(int, int): Cell] cells
     {field} list[(int, int)] all_lines
-    
+
     int column_height(int)
     void add_piece(int, int)
-    
+
     bool check_win()
     bool check_line(list)
-    
+
     bool line_full(line)
     bool grid_full()
 }
@@ -22,7 +22,7 @@ class Cell {
     int row
     int column
     str symbol
-    
+
     bool is_empty()
     void set_symbol(str)
     bool __eq__(Cell)
@@ -31,17 +31,17 @@ class Cell {
 class Game {
     Interface interface
     Grid grid
-    
+
     int num_rows
     int num_columns
-    
+
     list[Player] players
     bool game_over
     int current_player_num
     Player current_player
     int turn_num
     dict[int: Grid] past_states
-    
+
     void add_human_player(str, str)
     void add_computer_player(str, int, str)
     void make_player_move()
@@ -57,7 +57,7 @@ class GUI {
 
 class Interface{
     Game game
-    
+
     void add_player()
     int get_move(Player)
     void display_win(Player)
@@ -69,7 +69,7 @@ class Player{
     Game game
     str name
     str symbol
-    
+
     int get_move()
     void register_error()
 }
@@ -79,14 +79,53 @@ class Player{
 class ComputerPlayer{
     int difficulty
     Strategy strategy
-    
+
     int get_move()
 }
 
 class Strategy{
+    str symbol
+    Grid grid
+    Evaluator evaluator
+    list[int] ranked_indices
+    float select_p
+
+
+    void rank_moves()
+    int move()
 }
 
 class Evaluator{
+    Grid grid
+    int num_columns
+    int num_rows
+    str player_symbol
+
+    int _postion
+    int _mask
+    int _full_grid
+    int _depth
+
+    dict[int, int] cache
+    list[int] move_values
+
+    void grid_to_int()
+    int get_position()
+    int get_mask()
+
+    bool check_n_in_a_row(int, int)
+    tuple(int) make_move(int, int, int)
+    bool check_bit(int, int, int)
+
+    tuple(int, int) minimax_alpha_beta(int, int, bool, int, int, int)
+
+    list[int] calculate_move_values()
+    int calculate_full_grid()
+
+    tuple(int, int) get_cache(int, int, int)
+    void set_cache(int, int, int, int)
+
+    int evaluate_grid(int)
 }
 
 

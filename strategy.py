@@ -218,6 +218,7 @@ class Evaluator:
         row: int
             The row to check, counts from the top.
 
+
         Returns
         -------
         bool

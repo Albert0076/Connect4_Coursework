@@ -34,7 +34,7 @@ class Game:
         self.current_player_num: int = 0  # The index of the player whose turn it is
         self.current_player = None
         self.turn_num: int = 1 # Start at 1 since it is the state after the move has been made
-        self.past_states: dict = {0: copy.deepcopy(self.grid)}  # A dictionary of past game states with the turn num as the index
+        self.past_states: dict = {0: [copy.deepcopy(self.grid), None, None]}  # A dictionary of past game states with the turn num as the index
 
 
     def add_human_player(self, name: str, symbol=""):
@@ -134,7 +134,8 @@ class Game:
         evaluator = Evaluator(self.past_states[turn][0], self.players[turn % len(self.players)].symbol, 11)
         evaluator.grid_to_int()
         evaluator.calculate_move_values()
-        return [element[0] for element in evaluator.move_values]
+        # Need to check if it is a none value.
+        return [element if element is None else element[0] for element in evaluator.move_values]
 
 
 

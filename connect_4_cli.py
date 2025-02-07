@@ -1,6 +1,7 @@
 from back_end import Game, Player
 import pyinputplus
 from colorama import Fore, Style
+import math
 
 
 class CLI:
@@ -187,14 +188,21 @@ class CLI:
         while player_choice:
             turn_choice = pyinputplus.inputInt("What turn do you want to look at: ", min=1, max=self.game.turn_num)
             turn = self.game.past_states[turn_choice - 1]
+            player_moved = self.game.players[(turn_choice-2) % len(self.game.players)]
+            player_to_move = self.game.players[(turn_choice-1) % len(self.game.players)]
+            if turn_choice != 1:
+                print(f"{player_moved.name} made the move {turn[1]+1}.")
+
+            print(f"It was {player_to_move.name}'s turn.")
+
             self.display_grid(grid=turn[0], highlighted_moves=[(turn[2], turn[1])])
 
-            evaluate_choice = pyinputplus.inputYesNo("Do you want to evaluate the move. Y/N") == "yes"
+            evaluate_choice = pyinputplus.inputYesNo("Do you want to evaluate the next move. Y/N") == "yes"
             if evaluate_choice:
                 # This functions tells us what symbol to use base on the given value
                 # 10: "++", 0 -> 10: "+" , 0: "=", -9 -> -1 : "-", -10: "--"
-                evaluate_symbol = lambda x: "=" if x == 0 else (
-                    ("++" if x == 10 else "+") if x > 0 else ("--" if x == -10 else "-"))
+                evaluate_symbol = lambda x: "!" if x is None else "=" if x == 0 else (
+                    ("++" if x == math.inf else "+") if x > 0 else ("--" if x == -math.inf else "-"))
 
                 move_values = self.game.evaluate_move(turn_choice - 1)
                 for i in range(len(move_values)):
@@ -217,3 +225,4 @@ class CLI:
 if __name__ == "__main__":
     cli = CLI()
     cli.comp_v_comp()
+
