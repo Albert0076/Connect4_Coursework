@@ -1,5 +1,5 @@
 import numpy as np
-from connect4_structure_prototype import Grid, Cell
+from main_project.connect4_structure import Grid
 from scipy import signal
 
 MAX = 10

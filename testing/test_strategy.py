@@ -1,6 +1,6 @@
 import pytest
-from strategy import Strategy, Evaluator
-from connect4_structure_prototype import Grid
+from main_project.strategy import Evaluator
+from main_project.connect4_structure import Grid
 
 
 class TestEvaluator:

@@ -1,5 +1,5 @@
 import pytest
-from connect4_structure_prototype import Grid, Cell
+from main_project.connect4_structure import Grid
 
 
 class TestGrid:
@@ -64,3 +64,11 @@ class TestGrid:
         assert not three_in_a_row.check_win()
         for grid in four_in_a_rows:
             assert grid.check_win()
+
+    def test_column_height(self, empty_grid, full_grid, three_in_a_row):
+        assert empty_grid.column_height(0) == 0
+        assert full_grid.column_height(0) == 6
+        assert three_in_a_row.column_height(0) == 1
+
+
+

@@ -1,6 +1,3 @@
-import minmaxxing_protoype
-
-
 class Grid:
     def __init__(self):
         self.array = [[Symbol() for i in range(3)] for j in range(3)]

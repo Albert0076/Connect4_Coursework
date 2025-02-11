@@ -1,12 +1,10 @@
 # A lot of the work on this file is taken from this article:
 # https://towardsdatascience.com/creating-the-perfect-connect-four-ai-bot-c165115557b0
 # A lot of the minimax code is base on code from: https://github.com/aimacode/aima-python/blob/master/games.py
-from itertools import count
 
-from connect4_structure_prototype import Grid
+from main_project.connect4_structure import Grid
 import numpy as np
 from collections import defaultdict
-import time
 from random import randint
 
 cache = defaultdict(lambda: None) # cache may not be working properly because it doesn't account for whose turn it is

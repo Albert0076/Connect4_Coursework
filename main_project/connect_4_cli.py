@@ -1,10 +1,39 @@
-from back_end import Game, Player
+from main_project.back_end import Game, Player
 import pyinputplus
 from colorama import Fore, Style
 import math
 
+class Interface:
+    # This is the basic template for an interface. All interfaces (CLI or GUI) must have these methods.
+    def __init__(self):
+        self.game = None
 
-class CLI:
+    def setup(self):
+        pass
+
+    def get_move(self, player: Player):
+        pass
+
+    def display_grid(self):
+        pass
+
+    def display_move(self, move: int):
+        pass
+
+    def display_win(self, player: Player):
+        pass
+
+    def display_draw(self):
+        pass
+
+    def display_invalid_move(self, error):
+        pass
+
+    def computer_thinking(self, player: Player):
+        pass
+
+
+class CLI(Interface):
     difficulty_dictionary = {"Very Easy": 0,
                              "Easy": 1,
                              "Medium": 2,
@@ -14,6 +43,7 @@ class CLI:
     colours = {"R": Fore.RED, "B": Fore.BLUE, "G": Fore.GREEN, "Y": Fore.YELLOW, }
 
     def __init__(self):
+        super().__init__()
         self.game = None
         self.symbols = [key for key in CLI.colours.keys()]
 
@@ -190,6 +220,7 @@ class CLI:
             turn = self.game.past_states[turn_choice - 1]
             player_moved = self.game.players[(turn_choice-2) % len(self.game.players)]
             player_to_move = self.game.players[(turn_choice-1) % len(self.game.players)]
+
             if turn_choice != 1:
                 print(f"{player_moved.name} made the move {turn[1]+1}.")
 
@@ -210,8 +241,8 @@ class CLI:
 
             player_choice = pyinputplus.inputYesNo("Do you want to analyse a different turn. Y/N") == "yes"
 
-    @staticmethod
-    def display_invalid_move(error):
+
+    def display_invalid_move(self, error):
         """
         Display an invalid move
         Parameters

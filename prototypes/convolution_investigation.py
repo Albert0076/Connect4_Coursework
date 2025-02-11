@@ -1,6 +1,4 @@
 import numpy as np
-from connect4_structure_prototype import Grid, Cell
-from scipy import signal
 import numpy_testing
 import time
 

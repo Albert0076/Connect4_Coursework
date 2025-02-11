@@ -1,4 +1,4 @@
-from connect4_structure_prototype import Grid
+from connect4_structure import Grid
 from collections import defaultdict
 import math
 import random

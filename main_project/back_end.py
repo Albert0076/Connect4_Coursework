@@ -1,8 +1,6 @@
-from connect4_structure_prototype import Grid
+from connect4_structure import Grid
 import copy
-import random
-from binary_string_minimax_test import find_best_move, get_bit_mask
-from strategy import Strategy, Evaluator
+from main_project.strategy import Strategy, Evaluator
 
 
 class Game:
