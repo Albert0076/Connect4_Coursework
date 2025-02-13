@@ -241,6 +241,22 @@ class CLI(Interface):
 
             player_choice = pyinputplus.inputYesNo("Do you want to analyse a different turn. Y/N") == "yes"
 
+    def display_score_graph(self):
+        evaluated_game = self.game.evaluate_game()
+        player_colours = {False: CLI.colours[self.game.players[1].symbol],
+                          True: CLI.colours[self.game.players[0].symbol]}
+
+        # 5+ -> 5, (-4, 4) -> (-4, 4), -5- -> -5
+        squish_data  = lambda x: 5 if x >= 5 else -5 if x <= -5 else x # Squished the data to the range we want
+        cell_full = lambda cell_height, value: ((abs(cell_height) <= abs(squish_data(value))) and
+                                                not (cell_height > 0 ^ value > 0))  # Checks if a cell should be coloured
+        cell_colour = lambda value: player_colours[value > 0]
+        cells = [[cell_full(height, evaluated_game[turn]) * (cell_colour(evaluated_game[turn]) + "#" + Fore.RESET) for turn in range(self.game.turn_num)]
+                 for height in range(5, -6, -1)]
+
+
+
+
 
     def display_invalid_move(self, error):
         """

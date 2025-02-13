@@ -33,6 +33,9 @@ class Game:
         self.current_player = None
         self.turn_num: int = 1 # Start at 1 since it is the state after the move has been made
         self.past_states: dict = {0: [copy.deepcopy(self.grid), None, None]}  # A dictionary of past game states with the turn num as the index
+        # {turn_num: [grid, move_made_row, move_made_column]}
+        # Turn 0 is an empty grid
+        # Turn 1 is after p1 has made a move
 
 
     def add_human_player(self, name: str, symbol=""):
@@ -127,13 +130,43 @@ class Game:
             self.past_states[self.turn_num] = copy.deepcopy(self.grid), move_made, self.grid.column_height(
                 move_made) - 1
 
-    def evaluate_move(self, turn: int):
+    def evaluate_move(self, turn: int, depth=11):
+        """
+        Evaluates the grid at the given turn, returning the evaluators value for each move that could have been made.
+        Parameters
+        ----------
+        turn: int
+            The turn to check.
+        depth: int
+            The depth at which the evaluator will check.
+
+        Returns
+        -------
+        list[int]
+            The evaluators values for all the possible moves.
+
+        """
         # This will look at the dictionary of moves and evaluate the move made on a scale of -10 to 10
-        evaluator = Evaluator(self.past_states[turn][0], self.players[turn % len(self.players)].symbol, 11)
+        # If it is turn 5 and red has just made a move then it will evaluate the possible moves for blue.
+        evaluator = Evaluator(self.past_states[turn][0], self.players[turn % len(self.players)].symbol, depth)
         evaluator.grid_to_int()
         evaluator.calculate_move_values()
         # Need to check if it is a none value.
         return [element if element is None else element[0] for element in evaluator.move_values]
+
+    def evaluate_game(self, depth=8):
+        # Want to go through every turn in the game and evaluate the grid for player 1.
+        # Since connect 4 is a zero sum game we the negative of player 1's score will be player 2's score
+        turn_evaluations = dict() # {turn_num: [value, player_num]}
+        # Doing it as a dictionary since the turns are stored in a dictionary
+        for item in list(self.past_states.items()):
+            evaluator = Evaluator(item[1][0], self.players[0].symbol, depth)
+            evaluator.grid_to_int()
+            turn_evaluations[item[0]] = evaluator.evaluate_self()[0]
+
+        return turn_evaluations
+
+
 
 
 

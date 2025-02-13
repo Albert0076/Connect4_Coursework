@@ -330,6 +330,9 @@ class Evaluator:
 
         return self.move_values
 
+    def evaluate_self(self):
+        return self.minimax_alpha_beta(self._mask, self._position, True, self._depth, -math.inf, math.inf)
+
     def calculate_full_grid(self):
         """
         Calculates the integer value of a full grid.
