@@ -248,11 +248,25 @@ class CLI(Interface):
 
         # 5+ -> 5, (-4, 4) -> (-4, 4), -5- -> -5
         squish_data  = lambda x: 5 if x >= 5 else -5 if x <= -5 else x # Squished the data to the range we want
-        cell_full = lambda cell_height, value: ((abs(cell_height) <= abs(squish_data(value))) and
-                                                not (cell_height > 0 ^ value > 0))  # Checks if a cell should be coloured
-        cell_colour = lambda value: player_colours[value > 0]
-        cells = [[cell_full(height, evaluated_game[turn]) * (cell_colour(evaluated_game[turn]) + "#" + Fore.RESET) for turn in range(self.game.turn_num)]
-                 for height in range(5, -6, -1)]
+        cell_full = lambda height, val: ((abs(height) <= abs(squish_data(val))) and
+                                         not ((height > 0) ^ (val > 0)))  # Checks if a cell should be coloured
+        cell_colour = lambda val: player_colours[val > 0]
+        cell_string = lambda height, val: cell_full(height, val) * (cell_colour(val) + "#" + Fore.RESET)
+        cells = []
+
+        for cell_height in range(5, -6, -1):
+            row = []
+            for turn in range(self.game.turn_num):
+                value = evaluated_game[turn]
+                row.append(cell_string(cell_height, value))
+
+            row.append("\n")
+
+            if cell_height != 0:
+                cells.append(row)
+
+        print("".join(["".join(row) for row in cells]))
+
 
 
 
@@ -271,5 +285,5 @@ class CLI(Interface):
 
 if __name__ == "__main__":
     cli = CLI()
-    cli.comp_v_comp()
+    cli.human_v_human()
 
