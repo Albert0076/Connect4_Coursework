@@ -1,5 +1,5 @@
 # A lot of the work on this file is taken from this article:
-# https://towardsdatascience.com/creating-the-perfect-connect-four-ai-bot-c165115557b0
+# https://medium.com/towards-data-science/creating-the-perfect-connect-four-ai-bot-c165115557b0
 # A lot of the minimax code is base on code from: https://github.com/aimacode/aima-python/blob/master/games.py
 
 from main_project.connect4_structure import Grid
