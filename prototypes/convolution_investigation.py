@@ -1,27 +1,26 @@
 import numpy as np
 import numpy_testing
+from main_project.connect4_structure import Grid
 import time
 
 N = 10_000
-arrays = [np.random.randint(3, size=(100, 100)) for i in range(N)]
+arrays_np = [np.random.randint(3, size=(6, 7)) for i in range(N)]
+arrays_old = [numpy_testing.np_to_grid(grid) for grid in arrays_np]
 
 time_0 = time.time()
 
-fft_arrays = [numpy_testing.check_win_fft(array, 1, 2) for array in arrays]
+fft_arrays = [numpy_testing.check_win(array, 1, 2) for array in arrays_np]
 
 fft_time = time.time() - time_0
 
 time_1 = time.time()
 
-conv_2d_arrays = [numpy_testing.check_win_2d_conv(array, 1, 2) for array in arrays]
+old_values = [grid.check_win() for grid in arrays_old]
 
-conv_2d_time = time.time() - time_1
-
-time_2 = time.time()
-
-old_arrays = [numpy_testing.old_check_win(array, 1) for array in arrays]
-
-old_time = time.time() - time_2
+old_time = time.time() - time_1
 
 
-print(f"FFT Convolution: {fft_time/N:.6f}\n2D Convolution: {conv_2d_time/N:.6f}\nOld Method: {old_time/N:.6f}")
+
+print(fft_time)
+
+print(old_time)

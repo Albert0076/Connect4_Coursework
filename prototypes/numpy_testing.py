@@ -13,15 +13,29 @@ pos_weights = [0, 1, 2, 3, 3, 2, 1, 0]
 
 def convert_to_np(grid: Grid):
     np_grid = np.zeros((grid.num_columns, grid.num_rows))
-    for cell in grid.cells.move_values():
+    for cell in grid.cells.values():
         if not cell.is_empty():
-            if cell.symbol == "r":
+            if cell.symbol == "R":
                 np_grid[cell.column, cell.row] = 1
 
             else:
                 np_grid[cell.column, cell.row] = 2
 
     return np_grid
+
+
+def np_to_grid(grid: np.array):
+    columns, rows = grid.shape[0], grid.shape[1]
+    new_grid = Grid(rows, columns, 4)
+    symbol_dict = {0: None, 1: "R", 2: "B"}
+
+    for column in range(columns):
+        for row in range(rows):
+            symbol = symbol_dict[grid[column, row]]
+            if symbol:
+                new_grid.set_cell(row, column, symbol)
+
+    return new_grid
 
 
 def get_kernels(size):
@@ -155,6 +169,17 @@ def is_full(grid):
 
 
 if __name__ == "__main__":
-    pass
+    grid = Grid()
+    grid.add_piece(0, "R")
+    grid.add_piece(1, "B")
+
+    print(grid)
+
+
+    np_grid = convert_to_np(grid)
+    print(np_grid)
+
+    new_grid = np_to_grid(np_grid)
+    print(new_grid)
 
 # May need a more sophisticated evaluate function in order to make it make better and faster moves
