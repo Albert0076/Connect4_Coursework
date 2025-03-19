@@ -1,3 +1,5 @@
+from typing import Iterable
+
 from connect4_structure import Grid
 from collections import defaultdict
 import math
@@ -79,7 +81,7 @@ class Evaluator:
 
         self.cache = defaultdict(lambda: (None, None))
 
-        self.move_values = []
+        self.move_values: list = []
 
     def grid_to_int(self):
         """
@@ -309,7 +311,7 @@ class Evaluator:
 
         return best, current_length + 1
 
-    def calculate_move_values(self):
+    def calculate_move_values(self) -> list:
         """
         Calculates the value of all possible moves from the position and mask.
         Returns
@@ -404,11 +406,23 @@ class Evaluator:
             the estimate for the value of the grid
 
         """
-        int_string = format(position, f'0{self.grid.num_columns * (self.grid.num_rows + 1)}b')
-        # I need to come back to this/comment it because I forgot what this does. It seems to work though.
-        columns = [int(int_string[(self.num_rows + 1) * i: (self.num_rows + 1) * (i + 1)]) for i in
-                   range(self.num_columns)]
-        return sum([num.bit_count() for num in columns])
+        total = 0
+        base_shift = position >> self.num_rows + 1
+
+        shift = position & base_shift
+        total += (shift & (shift >> (self.num_rows + 1))).bit_count()
+
+
+        shift = position & (base_shift << 1)
+        total += shift & (shift >> self.num_rows).bit_count()
+
+        shift = position & (base_shift >> 1)
+        total += shift & (shift >> (self.num_rows + 2)).bit_count()
+
+        shift = position & (position >> 1)
+        total += shift & (shift >> 1).bit_count()
+
+        return total
 
     def __repr__(self):
         return f"Evaluator({self.grid=}, {self.player_symbol=})"
