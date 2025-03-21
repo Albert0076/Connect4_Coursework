@@ -1,3 +1,6 @@
+import random
+
+
 class Grid:
     def __init__(self, num_rows=6, num_columns=7, win_num=4):
         """
@@ -16,18 +19,21 @@ class Grid:
         self.winning_symbol = None
 
         # Cells ares stored in a dictionary, with a tuple of coordinates as the key and the Cell class as the data
-        self.cells = {(row, column): Cell(row, column) for row in range(self.num_rows) for column in range(self.num_columns)}
+        self.cells = {(row, column): Cell(row, column) for row in range(self.num_rows) for column in
+                      range(self.num_columns)}
 
         # The rows, columns and diagonals are then stored as lists of tuples which can then be checked in the dictionary
         self.columns = [[(row, column) for row in range(self.num_rows)] for column in range(self.num_columns)]
 
         self.rows = [[(row, column) for column in range(self.num_columns)] for row in range(self.num_rows)]
 
-        self.SW_diagonals = [[(row, column) for row in range(self.num_rows) for column in range(self.num_columns) if row + column == k]
-                             for k in range(2 * min(self.num_columns, self.num_rows))]
+        self.SW_diagonals = [
+            [(row, column) for row in range(self.num_rows) for column in range(self.num_columns) if row + column == k]
+            for k in range(2 * min(self.num_columns, self.num_rows))]
 
         self.SE_diagonals = [
-            [(row, self.num_columns - column - 1) for row in range(self.num_rows) for column in range(self.num_columns) if row + column == k]
+            [(row, self.num_columns - column - 1) for row in range(self.num_rows) for column in range(self.num_columns)
+             if row + column == k]
             for k in range(2 * min(self.num_columns, self.num_rows))]
 
         self.all_lines = self.columns + self.rows + self.SW_diagonals + self.SE_diagonals
@@ -117,7 +123,9 @@ class Grid:
             for start_index in range(len(line) - self.win_num + 1):
                 # We loop through from the first position in the line, up to the last one where a win could still be
                 # possible
-                won = all([self.cells[line[start_index]] == self.cells[line[start_index + relative_index]] for relative_index in range(self.win_num)])
+                won = all(
+                    [self.cells[line[start_index]] == self.cells[line[start_index + relative_index]] for relative_index
+                     in range(self.win_num)])
 
                 if won:
                     # If a line has n in a row we find the winning symbol and then return True
@@ -157,6 +165,30 @@ class Grid:
 
     def set_cell(self, row, column, symbol):
         self.cells[(row, column)].set_symbol(symbol)
+
+    def random_fill(self, n):
+        """
+        Randomly fills the grid. Used for testing
+        Parameters
+        ----------
+        n: int
+            How many pieces to add to the grid
+
+        """
+        symbols = ["R", "B"]
+        for index in range(n):
+            if self.grid_full():
+                break
+
+            piece_added = False
+
+            while not piece_added:
+                try:
+                    self.add_piece(random.randint(0, n - 1), symbols[index])
+                    piece_added = True
+
+                except IndexError:
+                    pass
 
     def __repr__(self):
         """
@@ -267,9 +299,6 @@ if __name__ == "__main__":
             grid.add_piece(i, "Yellow")
 
         grid.add_piece(i, "Red")
-
-
-
 
     print(grid)
     print(grid.check_win())

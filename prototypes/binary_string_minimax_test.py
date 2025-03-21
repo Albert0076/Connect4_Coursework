@@ -6,9 +6,11 @@ from main_project.connect4_structure import Grid
 import numpy as np
 from collections import defaultdict
 from random import randint
+import time
 
-cache = defaultdict(lambda: None) # cache may not be working properly because it doesn't account for whose turn it is
+cache = defaultdict(lambda: None)  # cache may not be working properly because it doesn't account for whose turn it is
 FULL_GRID = 558517276622718
+
 
 # The Grid will be represented by a 7x7 grid with the top row being always empty, it will be represented by 7 7bit binary numbers with each byte representing a column
 
@@ -72,8 +74,6 @@ def evaluate_board(position, mask):
     return three_in_a_row
 
 
-
-
 def count_three_in_a_row(position):
     # This function is taking up a lot of time especially the bit count there could be a way of dynamically counting the three in a rows
     total = 0
@@ -90,6 +90,7 @@ def count_three_in_a_row(position):
     total += (shift & (shift >> 1)).bit_count()
 
     return total
+
 
 def check_three_in_a_row(position):
     shift = position & (position >> 7)
@@ -111,13 +112,8 @@ def check_three_in_a_row(position):
     return 0
 
 
-
-
-
-
-
 def is_invalid_board(mask, column):
-    return mask & (1 << (7 * (7 -column) - 1))
+    return mask & (1 << (7 * (7 - column) - 1))
 
 
 def make_move(position, mask, column):
@@ -172,6 +168,7 @@ def minimax_alpha_beta(position, mask, is_max, alpha=-np.inf, beta=np.inf):
 
     return best
 
+
 def minimax_alpha_beta_depth(position, mask, is_max, depth, alpha=-np.inf, beta=np.inf):
     if check_four_in_a_row(position ^ mask):
         if is_max:
@@ -204,7 +201,7 @@ def minimax_alpha_beta_depth(position, mask, is_max, depth, alpha=-np.inf, beta=
         if not cache[(state[0], state[1])] is None:
             val = cache[(state[0], state[1])]
         else:
-            val = minimax_alpha_beta_depth(state[0], state[1],not is_max, depth-1, alpha, beta)
+            val = minimax_alpha_beta_depth(state[0], state[1], not is_max, depth - 1, alpha, beta)
             if val == np.inf or val == -np.inf:
                 cache[(state[0], state[1])] = val
 
@@ -222,7 +219,6 @@ def minimax_alpha_beta_depth(position, mask, is_max, depth, alpha=-np.inf, beta=
                 return beta
 
     return best
-
 
 
 def find_best_move(position, mask, depth):
@@ -244,7 +240,7 @@ def generate_random_grid(n):
     while not grid_made:
         for i in range(n):
             move_made = False
-            if i%2 == 0:
+            if i % 2 == 0:
                 symbol = "R"
 
             else:
@@ -263,39 +259,23 @@ def generate_random_grid(n):
     return grid
 
 
-
-
-
 if __name__ == "__main__":
-    grid = Grid()
+    test_grid = Grid()
 
-    grid.add_piece(0, "B")
-    grid.add_piece(0, "R")
-    grid.add_piece(1, "R")
-    grid.add_piece(1, "R")
-    grid.add_piece(1, "B")
-    grid.add_piece(1, "R")
-    grid.add_piece(1, "R")
-    grid.add_piece(1, "B")
-    grid.add_piece(4, "B")
-    grid.add_piece(5, "B")
-    grid.add_piece(5, "R")
-    grid.add_piece(6, "B")
-    grid.add_piece(6, "R")
-    grid.add_piece(6, "R")
-    grid.add_piece(6, "B")
-    grid.add_piece(6, "B")
+    max_depth = 15
+    repeats = 5
+
+    data = []
+
+    for i in range(11, max_depth):
+        total = 0
+        for j in range(repeats):
+            t0 = time.time()
+            position, mask = get_bit_mask(test_grid, "R")
+            find_best_move(position, mask, i)
+            total += time.time() - t0
+
+        data.append(total / repeats)
 
 
-    grids = get_bit_mask(grid, "R")
-    pos = grids[0]
-    mask = grids[1]
-    print(find_best_move(pos, mask, 10))
-
-
-
-
-
-
-
-
+    print(data)

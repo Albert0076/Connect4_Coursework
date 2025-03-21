@@ -154,6 +154,20 @@ class Game:
         # Need to check if it is a none value.
         return [element if element is None else element[0] for element in evaluator.move_values]
 
+    def evaluate_game(self, depth=8):
+        # Want to go through every turn in the game and evaluate the grid for player 1.
+        # Since connect 4 is a zero sum game we the negative of player 1's score will be player 2's score
+        turn_evaluations = dict() # {turn_num: value}
+        # Doing it as a dictionary since the turns are stored in a dictionary
+        for item in list(self.past_states.items()):
+            evaluator = Evaluator(item[1][0], self.players[0].symbol, depth)
+            evaluator.grid_to_int()
+            turn_evaluations[item[0]] = evaluator.evaluate_self()[0]
+
+        return turn_evaluations
+
+
+
 
 
 

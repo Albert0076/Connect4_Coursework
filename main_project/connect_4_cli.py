@@ -3,6 +3,7 @@ import pyinputplus
 from colorama import Fore, Style
 import math
 
+
 class Interface:
     # This is an abstract class for an interface
     def __init__(self):
@@ -40,7 +41,7 @@ class CLI(Interface):
                              "Hard": 3,
                              "Perfect": 4}
 
-    colours = {"R": Fore.RED, "B": Fore.BLUE, "G": Fore.GREEN, "Y": Fore.YELLOW, }
+    colours = {"R": Fore.RED, "B": Fore.BLUE, "G": Fore.GREEN, "Y": Fore.YELLOW}
 
     def __init__(self):
         super().__init__()
@@ -207,7 +208,7 @@ class CLI(Interface):
             The move which was just made.
 
         """
-        print(f"{self.game.current_player.name} made the move: {move + 1}")
+        print(f"{self.game.current_player.name} made the move: {move + 1}.")
 
     def analyse_game(self):
         """
@@ -230,30 +231,47 @@ class CLI(Interface):
 
             evaluate_choice = pyinputplus.inputYesNo("Do you want to evaluate the next move. Y/N") == "yes"
             if evaluate_choice:
+                # This functions tells us what symbol to use base on the given value
+                # 10: "++", 0 -> 10: "+" , 0: "=", -9 -> -1 : "-", -10: "--"
+                evaluate_symbol = lambda x: "!" if x is None else "=" if x == 0 else (
+                    ("++" if x == math.inf else "+") if x > 0 else ("--" if x == -math.inf else "-"))
 
                 move_values = self.game.evaluate_move(turn_choice - 1)
                 for i in range(len(move_values)):
-                    print(f"Move {i + 1}: {self.evaluate_symbol(move_values[i])}")
+                    print(f"Move {i + 1}: {evaluate_symbol(move_values[i])}")
 
             player_choice = pyinputplus.inputYesNo("Do you want to analyse a different turn. Y/N") == "yes"
 
-    @staticmethod
-    def evaluate_symbol(value):
-        """
-        Converts a move value into a symbol
-        Parameters
-        ----------
-        value: int
-            What the evaluator has evaluated a move as
+    def display_score_graph(self):
+        evaluated_game = self.game.evaluate_game()
+        player_colours = {False: CLI.colours[self.game.players[1].symbol],
+                          True: CLI.colours[self.game.players[0].symbol]}
 
-        Returns
-        -------
-        str
-            The symbol associated with that move value
+        # 5+ -> 5, (-4, 4) -> (-4, 4), -5- -> -5
+        squish_data  = lambda x: 5 if x >= 5 else -5 if x <= -5 else x # Squished the data to the range we want
+        cell_full = lambda height, val: ((abs(height) <= abs(squish_data(val))) and
+                                         not ((height > 0) ^ (val > 0)))  # Checks if a cell should be coloured
+        cell_colour = lambda val: player_colours[val > 0]
+        cell_string = lambda height, val: cell_full(height, val) * (cell_colour(val) + "#" + Fore.RESET)
+        cells = []
 
-        """
-        return "!" if value is None else "=" if value == 0 else (
-                    ("++" if value == math.inf else "+") if value > 0 else ("--" if value == -math.inf else "-"))
+        for cell_height in range(5, -6, -1):
+            row = []
+            for turn in range(self.game.turn_num):
+                value = evaluated_game[turn]
+                row.append(cell_string(cell_height, value))
+
+            row.append("\n")
+
+            if cell_height != 0:
+                cells.append(row)
+
+        print("".join(["".join(row) for row in cells]))
+
+
+
+
+
 
     def display_invalid_move(self, error):
         """
@@ -268,5 +286,5 @@ class CLI(Interface):
 
 if __name__ == "__main__":
     cli = CLI()
-    cli.comp_v_comp()
+    cli.human_v_human()
 
