@@ -33,7 +33,7 @@ class Strategy:
 
         # If the move is positively ranked we want to choose the move with the lowest length.
         # If it is negatively ranked we want to choose the move with the highest length.
-        # Moves with zero value should theoretically all have the same length so it shouldn't matter.
+        # Moves with zero value should theoretically all have the same length, so it shouldn't matter.
         ranked_values = sorted(indexed_values,
                                key=lambda element: (-element[0], (-1 if element[0] < 0 else 1) * element[1]))
         self.ranked_indices = [value[2] for value in ranked_values]
@@ -73,6 +73,7 @@ class Evaluator:
         self.num_columns = self.grid.num_columns
         self.num_rows = self.grid.num_rows
         self.player_symbol = player_symbol
+        self.is_default = (self.num_columns == 7) and (self.num_rows == 6)
 
         self._position: int = 0
         self._mask: int = 0
@@ -406,23 +407,23 @@ class Evaluator:
             the estimate for the value of the grid
 
         """
+        if not self.is_default:
+            # If it is not a 7x6 grid return 0 as a heuristic will not be used
+            return 0
+        weights = [[3, 4, 5, 7, 5, 4, 3],
+                   [4, 6, 8, 10, 8, 6, 4],
+                   [5, 8, 11, 13, 11, 8, 5],
+                   [5, 8, 11, 13, 11,  8, 5],
+                   [4, 6, 8, 10, 8, 6, 4],
+                   [3, 4, 5, 7, 5, 4, 3]]
+
         total = 0
-        base_shift = position >> self.num_rows + 1
-
-        shift = position & base_shift
-        total += (shift & (shift >> (self.num_rows + 1))).bit_count()
-
-
-        shift = position & (base_shift << 1)
-        total += shift & (shift >> self.num_rows).bit_count()
-
-        shift = position & (base_shift >> 1)
-        total += shift & (shift >> (self.num_rows + 2)).bit_count()
-
-        shift = position & (position >> 1)
-        total += shift & (shift >> 1).bit_count()
+        for column in range(7):
+            for row in range(6):
+                total += weights[row][column] * self.check_bit(position, column, row)
 
         return total
+
 
     def __repr__(self):
         return f"Evaluator({self.grid=}, {self.player_symbol=})"

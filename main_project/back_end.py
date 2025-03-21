@@ -31,12 +31,12 @@ class Game:
         self.game_over: bool = False
         self.current_player_num: int = 0  # The index of the player whose turn it is
         self.current_player = None
-        self.turn_num: int = 1 # Start at 1 since it is the state after the move has been made
-        self.past_states: dict = {0: [copy.deepcopy(self.grid), None, None]}  # A dictionary of past game states with the turn num as the index
+        self.turn_num: int = 1  # Start at 1 since it is the state after the move has been made
+        self.past_states: dict = {0: [copy.deepcopy(self.grid), None,
+                                      None]}  # A dictionary of past game states with the turn num as the index
         # {turn_num: [grid, move_made_row, move_made_column]}
         # Turn 0 is an empty grid
         # Turn 1 is after p1 has made a move
-
 
     def add_human_player(self, name: str, symbol=""):
         """
@@ -86,7 +86,6 @@ class Game:
             except IndexError as error:
                 self.current_player.register_error(error)
 
-
     def play_game(self):
         """
         Main logic of the game. Loops through the players until the game has ended
@@ -95,9 +94,9 @@ class Game:
         self.current_player = self.players[self.current_player_num]
         self.interface.display_grid()
         while not self.game_over:
-            move = self.make_player_move() # Want to send the CLI the move
+            move = self.make_player_move()  # Want to send the CLI the move
 
-            self.interface.display_grid(highlighted_moves=[(self.grid.column_height(move) -1, move)])
+            self.interface.display_grid(highlighted_moves=[(self.grid.column_height(move) - 1, move)])
             self.interface.display_move(move)
 
             self.turn_num += 1
@@ -154,22 +153,6 @@ class Game:
         # Need to check if it is a none value.
         return [element if element is None else element[0] for element in evaluator.move_values]
 
-    def evaluate_game(self, depth=8):
-        # Want to go through every turn in the game and evaluate the grid for player 1.
-        # Since connect 4 is a zero sum game we the negative of player 1's score will be player 2's score
-        turn_evaluations = dict() # {turn_num: value}
-        # Doing it as a dictionary since the turns are stored in a dictionary
-        for item in list(self.past_states.items()):
-            evaluator = Evaluator(item[1][0], self.players[0].symbol, depth)
-            evaluator.grid_to_int()
-            turn_evaluations[item[0]] = evaluator.evaluate_self()[0]
-
-        return turn_evaluations
-
-
-
-
-
 
 class Player:
     def __init__(self, game: Game, name: str, symbol=""):
@@ -219,7 +202,7 @@ class ComputerPlayer(Player):
                        1: (3, 0.7),
                        2: (6, 0.8),
                        3: (9, 0.95),
-                       4: (11, 1.0)}
+                       4: (10, 1.0)}
 
     def __init__(self, game: Game, name: str, difficulty: int, symbol=""):
         super().__init__(game, name, symbol)
