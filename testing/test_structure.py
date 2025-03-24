@@ -1,5 +1,5 @@
 import pytest
-from main_project.connect4_structure import Grid
+from main_project.connect4_grid import Grid
 
 
 class TestGrid:

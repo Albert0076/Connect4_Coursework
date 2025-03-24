@@ -1,6 +1,6 @@
 import numpy as np
 import numpy_testing
-from main_project.connect4_structure import Grid
+from main_project.connect4_grid import Grid
 import time
 
 N = 10_000

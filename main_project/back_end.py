@@ -1,4 +1,4 @@
-from connect4_structure import Grid
+from connect4_grid import Grid
 import copy
 from main_project.strategy import Strategy, Evaluator
 

@@ -1,5 +1,5 @@
 import math
-from main_project import connect4_structure as structure
+from main_project import connect4_grid as structure
 import time
 import copy
 

@@ -1,6 +1,6 @@
 import pytest
 from prototypes.binary_string_minimax_test import get_bit_mask, check_four_in_a_row
-from main_project.connect4_structure import Grid
+from main_project.connect4_grid import Grid
 
 class TestBinaryGrid:
     @pytest.fixture()

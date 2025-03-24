@@ -1,6 +1,4 @@
-from typing import Iterable
-
-from connect4_structure import Grid
+from main_project.connect4_grid import Grid
 from collections import defaultdict
 import math
 import random
@@ -481,24 +479,11 @@ class Evaluator:
 
 if __name__ == "__main__":
     grid = Grid()
-    grid.add_piece(0, "B")
-    grid.add_piece(0, "R")
-    grid.add_piece(1, "R")
-    grid.add_piece(1, "R")
-    grid.add_piece(1, "B")
-    grid.add_piece(1, "R")
-    grid.add_piece(1, "R")
-    grid.add_piece(1, "B")
-    grid.add_piece(4, "B")
-    grid.add_piece(5, "B")
-    grid.add_piece(5, "R")
-    grid.add_piece(6, "B")
-    grid.add_piece(6, "R")
-    grid.add_piece(6, "R")
-    grid.add_piece(6, "B")
-    grid.add_piece(6, "B")
+    for i in range(3):
+        grid.add_piece(0, "R")
+        grid.add_piece(3, "B")
 
-    evaluator = Evaluator(grid, "R", 12)
-    evaluator.grid_to_int()
-    evaluator.calculate_move_values()
-    print(evaluator.move_values)
+    strategy = Strategy(grid, "R", 5, 0.5)
+    strategy.rank_moves()
+    print(strategy.move())
+
