@@ -44,6 +44,10 @@ class CLI(Interface):
     colours = {"R": Fore.RED, "B": Fore.BLUE, "G": Fore.GREEN, "Y": Fore.YELLOW}
 
     def __init__(self):
+        """
+        Initializes the CLI
+
+        """
         super().__init__()
         self.game = None
         self.symbols = [key for key in CLI.colours.keys()]
@@ -71,6 +75,9 @@ class CLI(Interface):
         self.analyse_game()
 
     def comp_v_comp(self):
+        """
+        Sets up a game with two perfect computer players. Used for debugging.
+        """
         self.game = Game(self)
         self.game.add_computer_player("Hal 9000", 4, "R")
         self.game.add_computer_player("C3PO", 4, "B")
@@ -79,6 +86,10 @@ class CLI(Interface):
         self.analyse_game()
 
     def comp_v_human(self):
+        """
+        Sets up a game with a computer player and a human player. Used for debugging.
+
+        """
         self.game = Game(self)
         self.game.add_human_player("Raiden", "R")
         self.game.add_computer_player("Arsenal Gear", 4, "B")
@@ -87,6 +98,11 @@ class CLI(Interface):
         self.analyse_game()
 
     def human_v_human(self):
+        """
+        Sets up a game with two human players. Used for debugging.
+
+        """
+
         self.game = Game(self)
         self.game.add_human_player("Harry", "R")
         self.game.add_human_player("Kim", "B")
@@ -145,7 +161,7 @@ class CLI(Interface):
 
     def display_win(self, player: Player):
         """
-        Shows that a player has won the game.
+        Displays which player has won the game
         Parameters
         ----------
         player: Player
@@ -157,7 +173,8 @@ class CLI(Interface):
 
     def display_draw(self):
         """
-        Displays the game has resulted in a draw.
+        Displays that the game has resulted in a draw.
+
         """
         print("The Grid is full and the game has ended in a draw")
 
@@ -240,6 +257,19 @@ class CLI(Interface):
 
     @staticmethod
     def val_to_symbol(value):
+        """
+        Converts the value of a move into a symbol to display to the user
+        Parameters
+        ----------
+        value: float
+            The value of the move
+
+        Returns
+        -------
+        str:
+            The symbol associated with the input value
+
+        """
         if value is None:
             return "!"
         if value == 0:
@@ -265,4 +295,4 @@ class CLI(Interface):
 
 if __name__ == "__main__":
     cli = CLI()
-    cli.comp_v_comp()
+    cli.setup()

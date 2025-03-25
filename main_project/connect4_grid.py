@@ -293,12 +293,4 @@ class Cell:
 
 
 if __name__ == "__main__":
-    grid = Grid()
-    for i in range(4):
-        for j in range(i):
-            grid.add_piece(i, "Yellow")
-
-        grid.add_piece(i, "Red")
-
-    print(grid)
-    print(grid.check_win())
+    pass

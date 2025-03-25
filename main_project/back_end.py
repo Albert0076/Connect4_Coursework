@@ -1,4 +1,4 @@
-from connect4_grid import Grid
+from main_project.connect4_grid import Grid
 import copy
 from main_project.strategy import Strategy, Evaluator
 
@@ -202,9 +202,25 @@ class ComputerPlayer(Player):
                        1: (3, 0.7),
                        2: (6, 0.8),
                        3: (9, 0.95),
-                       4: (10, 1.0)}
+                       4: (10, 1.0),
+                       5: (1, 1.0)} #5 is used for testing as it has no randomness but does not take time to test
 
     def __init__(self, game: Game, name: str, difficulty: int, symbol=""):
+        """
+        Initializes the computer player.
+        Parameters
+        ----------
+        game: Game
+            The Game object
+        name: str
+            The name of the player.
+        difficulty: int
+            The difficulty of the computer.
+        symbol: str
+            The symbol of the player.
+
+        """
+
         super().__init__(game, name, symbol)
         self.difficulty = difficulty
         difficulty_tuple = ComputerPlayer.difficulty_dict[difficulty]

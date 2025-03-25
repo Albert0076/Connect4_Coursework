@@ -6,11 +6,24 @@ import random
 
 class Strategy:
     def __init__(self, grid: Grid, player_symbol: str, depth: int, select_p: float):
+        """
+        Initialize the strategy.
+        Parameters
+        ----------
+        grid: Grid
+            The grid to use for this strategy.
+        player_symbol: str
+            The symbol of the player whose is making the move
+        depth: int
+            The depth to which the strategy should search
+        select_p: float
+            The probability that the strategy selects a move
+        """
         self.symbol = player_symbol
         self.grid = grid
         self.evaluator = Evaluator(grid, player_symbol, depth)
         self.ranked_indices = []
-        self.select_p: float = select_p  # The probability a given value will be selected
+        self.select_p: float = select_p
 
     def rank_moves(self):
         """
@@ -332,6 +345,15 @@ class Evaluator:
         return self.move_values
 
     def evaluate_self(self):
+        """
+        Runs the minimax algorithm on the values stored in self._mask and self._position
+        Returns
+        -------
+        float:
+            The value of the grid described by self._mask and self._position.
+
+        """
+
         return self.minimax_alpha_beta(self._mask, self._position, True, self._depth, -math.inf, math.inf)
 
     def calculate_full_grid(self):
@@ -361,7 +383,7 @@ class Evaluator:
 
         Returns
         -------
-        int
+        list[int]
             The cached value stored
 
         """
@@ -445,6 +467,19 @@ class Evaluator:
         return "".join(["".join(column_list) + "\n" for column_list in output_list])
 
     def grid_list(self, grid_int: int):
+        """
+        Converts the input value into an array of ones and zeros
+        Parameters
+        ----------
+        grid_int: int
+            The binary number to convert.
+
+        Returns
+        -------
+        list[list[int]]
+            The list of ones and zeros
+
+        """
         # We are seeing if we want to return the mask or the position
         grid_to_convert = grid_int
         # Get a binary string of the length we want so we can easily print it:
@@ -461,6 +496,19 @@ class Evaluator:
         return output_list
 
     def get_grid(self, op_symbol):
+        """
+        Converts self._position and self._mask into a grid class, used for debugging.
+        Parameters
+        ----------
+        op_symbol:
+            The symbol of the opposing player
+
+        Returns
+        -------
+        Grid:
+            The Grid representing the mask and position
+
+        """
         player_output_list = self.grid_list(self._position)
         op_output_list = self.grid_list(self._mask ^ self._position)
         new_grid = Grid(self.num_rows, self.num_columns, self.grid.win_num)
@@ -478,12 +526,5 @@ class Evaluator:
 
 
 if __name__ == "__main__":
-    grid = Grid()
-    for i in range(3):
-        grid.add_piece(0, "R")
-        grid.add_piece(3, "B")
-
-    strategy = Strategy(grid, "R", 5, 0.5)
-    strategy.rank_moves()
-    print(strategy.move())
+    pass
 
